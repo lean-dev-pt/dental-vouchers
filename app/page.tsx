@@ -8,73 +8,17 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [pricingSelectedPlan, setPricingSelectedPlan] = useState<'monthly' | 'annual'>('annual');
-  const [isLoading, setIsLoading] = useState(false);
-  const [pricingIsLoading, setPricingIsLoading] = useState(false);
 
-  const handleCheckout = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planType: selectedPlan }),
-      });
-
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else if (data.error) {
-        // If user is not authenticated, redirect to sign up
-        if (data.error === 'Unauthorized') {
-          window.location.href = '/auth/sign-up';
-        } else {
-          console.error('Checkout error:', data.error);
-          alert('Erro ao iniciar checkout. Por favor, tente novamente.');
-          setIsLoading(false);
-        }
-      }
-    } catch (error) {
-      console.error('Error starting checkout:', error);
-      alert('Erro ao iniciar checkout. Por favor, tente novamente.');
-      setIsLoading(false);
-    }
+  const handleCheckout = () => {
+    // Redirect to sign-up with selected plan
+    window.location.href = `/auth/sign-up?plan=${selectedPlan}`;
   };
 
-  const handlePricingCheckout = async () => {
-    setPricingIsLoading(true);
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planType: pricingSelectedPlan }),
-      });
-
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else if (data.error) {
-        // If user is not authenticated, redirect to sign up
-        if (data.error === 'Unauthorized') {
-          window.location.href = '/auth/sign-up';
-        } else {
-          console.error('Checkout error:', data.error);
-          alert('Erro ao iniciar checkout. Por favor, tente novamente.');
-          setPricingIsLoading(false);
-        }
-      }
-    } catch (error) {
-      console.error('Error starting checkout:', error);
-      alert('Erro ao iniciar checkout. Por favor, tente novamente.');
-      setPricingIsLoading(false);
-    }
+  const handlePricingCheckout = () => {
+    // Redirect to sign-up with selected plan
+    window.location.href = `/auth/sign-up?plan=${pricingSelectedPlan}`;
   };
 
   return (
@@ -149,10 +93,9 @@ export default function Home() {
             size="lg"
             className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold text-xl px-12 py-8 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all"
             onClick={handleCheckout}
-            disabled={isLoading}
           >
-            {isLoading ? 'A processar...' : 'Começar Agora'}
-            {!isLoading && <ArrowRight className="ml-3 h-6 w-6" />}
+            Começar Agora
+            <ArrowRight className="ml-3 h-6 w-6" />
           </Button>
 
           <p className="text-gray-500 mt-6 text-lg">
@@ -445,16 +388,11 @@ export default function Home() {
                     <Button
                       size="lg"
                       onClick={handlePricingCheckout}
-                      disabled={pricingIsLoading}
                       className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold text-lg py-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
                     >
-                      {pricingIsLoading ? 'A processar...' : 'Começar Agora'}
-                      {!pricingIsLoading && <ArrowRight className="ml-2 h-5 w-5" />}
+                      Começar Agora
+                      <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
-
-                    <p className="text-center text-sm text-gray-500 mt-4">
-                      Cancele a qualquer momento
-                    </p>
                   </div>
                 </div>
               </CardContent>

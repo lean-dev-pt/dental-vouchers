@@ -1,8 +1,47 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.03** - Stripe Subscription Integration
+**Version: 1.04** - Simplified Onboarding Flow
 
 ## 📝 Version History
+
+### Version 1.04 - Simplified Onboarding Flow
+**Release Date**: January 10, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Merged sign-up and onboarding into single beautiful form
+- Reduced user journey from 4 pages to 2 pages (50% reduction)
+- Implemented modern teal/cyan gradient design matching app theme
+- Fixed design inconsistency in authentication flow
+- Streamlined user experience for faster conversion
+
+**Files Modified:**
+- [app/page.tsx](app/page.tsx:11-24) - Simplified checkout handlers to redirect to sign-up with plan parameter
+- [app/page.tsx](app/page.tsx:92-99) - Removed loading states and simplified CTA buttons
+- [app/page.tsx](app/page.tsx:388-395) - Updated pricing section button
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:18-34) - Added clinic fields (name, owner, phone) and plan detection
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:36-107) - Implemented 3-step signup: auth → onboarding API → Stripe checkout
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:109-256) - Complete UI redesign with gradient styling, two sections, and modern layout
+- [app/auth/sign-up/page.tsx](app/auth/sign-up/page.tsx:1-14) - Added Suspense wrapper and gradient background
+- [app/api/onboarding/route.ts](app/api/onboarding/route.ts) - Created API endpoint for clinic and profile creation
+
+**Files Deleted:**
+- [app/onboarding/page.tsx] - Removed separate onboarding page (merged into sign-up)
+
+**Features Added:**
+- Single-page sign-up form with 6 fields (clinic info + account info)
+- Beautiful gradient design with organized sections
+- Plan display in form header
+- Automatic flow: Sign Up → Create Clinic/Profile → Stripe Checkout → Dashboard
+- Suspense boundary for proper Next.js 15 compatibility
+
+**Performance Improvements:**
+- Build successful with no errors
+- Total routes: 23 pages (reduced from 24)
+- Faster user conversion with fewer steps
+- Better mobile responsiveness with max-w-2xl form
+
+---
 
 ### Version 1.03 - Stripe Subscription Integration
 **Release Date**: January 9, 2025

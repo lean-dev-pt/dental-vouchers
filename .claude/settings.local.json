@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__generate_typescript_types",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "mcp__supabase__list_tables",
+      "mcp__shadcn__search_items_in_registries",
+      "mcp__shadcn__get_add_command_for_items",
+      "Bash(npx:*)",
+      "mcp__supabase__execute_sql",
+      "Bash(npm run dev:*)",
+      "mcp__shadcn__get_item_examples_from_registries",
+      "Bash(npm install:*)",
+      "WebSearch",
+      "Bash(rm:*)",
+      "mcp__supabase__list_migrations",
+      "Bash(node -e \"const fs = require(''fs''); const content = fs.readFileSync(''C:/Users/Jorge/coding/apps/dental-vouchers/app/dashboard/reports/page.tsx'', ''utf8''); let open = 0, close = 0; for(let c of content) { if(c === ''{'') open++; if(c === ''}'') close++; } console.log(''Open braces:'', open, ''Close braces:'', close, ''Difference:'', open - close);\")",
+      "Bash(cat:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shadcn",
+    "supabase"
+  ]
+}

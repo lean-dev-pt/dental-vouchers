@@ -20,7 +20,14 @@
       "Bash(cat:*)",
       "Bash(git init:*)",
       "Bash(git branch:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh auth:*)",
+      "Bash(git config:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(git merge:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

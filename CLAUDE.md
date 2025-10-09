@@ -1,6 +1,130 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.01** - Production-Ready Landing Page Launch
+**Version: 1.04** - Simplified Onboarding Flow
+
+## 📝 Version History
+
+### Version 1.04 - Simplified Onboarding Flow
+**Release Date**: January 10, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Merged sign-up and onboarding into single beautiful form
+- Reduced user journey from 4 pages to 2 pages (50% reduction)
+- Implemented modern teal/cyan gradient design matching app theme
+- Fixed design inconsistency in authentication flow
+- Streamlined user experience for faster conversion
+
+**Files Modified:**
+- [app/page.tsx](app/page.tsx:11-24) - Simplified checkout handlers to redirect to sign-up with plan parameter
+- [app/page.tsx](app/page.tsx:92-99) - Removed loading states and simplified CTA buttons
+- [app/page.tsx](app/page.tsx:388-395) - Updated pricing section button
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:18-34) - Added clinic fields (name, owner, phone) and plan detection
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:36-107) - Implemented 3-step signup: auth → onboarding API → Stripe checkout
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:109-256) - Complete UI redesign with gradient styling, two sections, and modern layout
+- [app/auth/sign-up/page.tsx](app/auth/sign-up/page.tsx:1-14) - Added Suspense wrapper and gradient background
+- [app/api/onboarding/route.ts](app/api/onboarding/route.ts) - Created API endpoint for clinic and profile creation
+
+**Files Deleted:**
+- [app/onboarding/page.tsx] - Removed separate onboarding page (merged into sign-up)
+
+**Features Added:**
+- Single-page sign-up form with 6 fields (clinic info + account info)
+- Beautiful gradient design with organized sections
+- Plan display in form header
+- Automatic flow: Sign Up → Create Clinic/Profile → Stripe Checkout → Dashboard
+- Suspense boundary for proper Next.js 15 compatibility
+
+**Performance Improvements:**
+- Build successful with no errors
+- Total routes: 23 pages (reduced from 24)
+- Faster user conversion with fewer steps
+- Better mobile responsiveness with max-w-2xl form
+
+---
+
+### Version 1.03 - Stripe Subscription Integration
+**Release Date**: January 9, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Implemented complete Stripe subscription billing system
+- Added monthly (€19) and annual (€190) subscription plans
+- Created interactive pricing section with clickable plan selection
+- Integrated Stripe Customer Portal for subscription management
+- Built comprehensive webhook handler for all subscription events
+
+**Files Modified:**
+- [lib/stripe/client.ts](lib/stripe/client.ts) - NEW: Client-side Stripe instance
+- [lib/stripe/server.ts](lib/stripe/server.ts) - NEW: Server-side Stripe instance with API v2025-09-30.clover
+- [app/api/stripe/checkout/route.ts](app/api/stripe/checkout/route.ts) - NEW: Checkout session creation API
+- [app/api/stripe/portal/route.ts](app/api/stripe/portal/route.ts) - NEW: Customer portal API
+- [app/api/stripe/webhook/route.ts](app/api/stripe/webhook/route.ts) - NEW: Webhook event handler
+- [app/page.tsx](app/page.tsx:11-78) - Added plan selection state and checkout handlers
+- [app/page.tsx](app/page.tsx:87-128) - Added hero section plan toggle with Stripe checkout
+- [app/page.tsx](app/page.tsx:385-458) - Created interactive pricing section with clickable plan cards
+- [app/dashboard/account/page.tsx](app/dashboard/account/page.tsx:46-66) - Added Subscription interface and state
+- [app/dashboard/account/page.tsx](app/dashboard/account/page.tsx:99-108) - Fetch subscription data from database
+- [app/dashboard/account/page.tsx](app/dashboard/account/page.tsx:194-246) - Added subscription management functions
+- [app/dashboard/account/page.tsx](app/dashboard/account/page.tsx:456-510) - Real subscription UI with status, plan details, and portal access
+- [.env.local](.env.local:6-24) - Added Stripe environment variables with documentation
+
+**Database Changes:**
+- Created `subscriptions` table with full lifecycle tracking (status, plan_type, billing periods)
+- Created `subscription_history` audit log table (mirrors voucher_status_history pattern)
+- Added RLS policies for secure multi-tenant access
+- Added indexes for performance optimization
+
+**Features Added:**
+- Complete Stripe subscription billing system
+- Monthly and annual plan options with 17% savings badge
+- Interactive pricing cards with visual selection feedback
+- Real-time subscription status display in account page
+- Stripe Customer Portal integration for subscription management
+- Webhook handling for checkout completion, subscription updates, cancellations, and payment failures
+- Automatic subscription status tracking and history logging
+
+**Performance Improvements:**
+- Build successful with no errors
+- Total routes: 23 pages
+- All API routes functional and type-safe
+
+---
+
+### Version 1.02 - Landing Page Refinement & GitHub/Vercel Setup
+**Release Date**: October 9, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Removed "Configure em 5 minutos" messaging from landing page
+- Simplified feature descriptions for better clarity
+- Cleaned up unused landing page variants
+- Established GitHub repository with staging/production workflow
+- Fixed production build errors for Vercel deployment
+
+**Files Modified:**
+- [app/page.tsx](app/page.tsx:52) - Removed setup time messaging
+- [app/page.tsx](app/page.tsx:97) - Updated feature description to "simples de usar"
+- [app/page.tsx](app/page.tsx:324) - Updated CTA heading and subtitle
+- [app/page.tsx](app/page.tsx:246-275) - Removed "Cheques Dentista Pro" title, updated pricing features list
+- [app/layout.tsx](app/layout.tsx:15) - Added logo.png as favicon
+- [app/page.tsx](app/page.tsx:16,350) - Replaced Receipt icon with logo.png image
+- [app/(marketing)/landing1/page.tsx](app/(marketing)/landing1/page.tsx:122,144,166) - Fixed ESLint quote errors
+- [app/(marketing)/landing2/page.tsx](app/(marketing)/landing2/page.tsx:359,392,426) - Fixed ESLint quote errors
+- Deleted: app/(marketing)/landing1/page.tsx, landing2/page.tsx, landing3/page.tsx
+
+**Features Added:**
+- Logo integration (favicon and header/footer)
+- GitHub repository setup with main/staging branches
+- Vercel deployment pipeline configured
+- Staging-to-production workflow established
+
+**Performance Improvements:**
+- Reduced total routes from 23 to 20 pages
+- Cleaner landing page messaging
+- Build passes ESLint validation
+
+---
 
 ## 🎯 Executive Summary
 Cheques Dentista is a specialized SaaS platform designed for Portuguese dental clinics to efficiently manage the complete lifecycle of dental vouchers (cheques dentista). The system provides end-to-end tracking, from initial voucher receipt through patient utilization to final payment settlement with both the national health service (ARS) and healthcare providers.

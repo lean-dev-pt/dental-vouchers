@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import {
   Tabs,
   TabsContent,
@@ -43,12 +44,27 @@ interface Profile {
   };
 }
 
+interface Subscription {
+  id: string;
+  clinic_id: string;
+  stripe_customer_id: string;
+  stripe_subscription_id: string | null;
+  plan_type: string | null;
+  status: string;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  canceled_at: string | null;
+}
+
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [defaultVoucherAmount, setDefaultVoucherAmount] = useState<string>("");
   const [savingAmount, setSavingAmount] = useState(false);
+  const [loadingPortal, setLoadingPortal] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -79,6 +95,17 @@ export default function AccountPage() {
               .toFixed(2)
               .replace('.', ',');
             setDefaultVoucherAmount(formattedAmount);
+          }
+
+          // Fetch subscription data
+          const { data: subscriptionData } = await supabase
+            .from("subscriptions")
+            .select("*")
+            .eq("clinic_id", profileData.clinic_id)
+            .single();
+
+          if (subscriptionData) {
+            setSubscription(subscriptionData);
           }
         }
       } catch (error) {
@@ -163,6 +190,60 @@ export default function AccountPage() {
     } finally {
       setSavingAmount(false);
     }
+  };
+
+  const handleManageSubscription = async () => {
+    setLoadingPortal(true);
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('Failed to create portal session');
+      }
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return { color: 'from-emerald-400 to-green-500', text: 'Ativa' };
+      case 'trialing':
+        return { color: 'from-blue-400 to-cyan-500', text: 'Em Teste' };
+      case 'past_due':
+        return { color: 'from-amber-400 to-orange-500', text: 'Pagamento Pendente' };
+      case 'canceled':
+        return { color: 'from-gray-400 to-gray-500', text: 'Cancelada' };
+      case 'incomplete':
+        return { color: 'from-violet-400 to-purple-500', text: 'Incompleta' };
+      default:
+        return { color: 'from-gray-400 to-gray-500', text: status };
+    }
+  };
+
+  const getPlanDisplayName = (planType: string | null) => {
+    switch (planType) {
+      case 'monthly':
+        return 'Mensal (€19/mês)';
+      case 'annual':
+        return 'Anual (€190/ano)';
+      default:
+        return 'Plano Desconhecido';
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('pt-PT');
   };
 
   if (loading) {
@@ -373,21 +454,61 @@ export default function AccountPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
-                <div className="p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-teal-800">Plano Profissional</h3>
-                    <Badge className="bg-gradient-to-r from-amber-400 to-orange-500 text-white">
-                      <Crown className="w-3 h-3 mr-1" />
-                      Ativo
-                    </Badge>
+                {subscription ? (
+                  <>
+                    <div className="p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold text-teal-800">
+                          {getPlanDisplayName(subscription.plan_type)}
+                        </h3>
+                        <Badge className={`bg-gradient-to-r ${getStatusBadge(subscription.status).color} text-white`}>
+                          <Crown className="w-3 h-3 mr-1" />
+                          {getStatusBadge(subscription.status).text}
+                        </Badge>
+                      </div>
+                      <div className="space-y-2 text-sm text-gray-600 mb-4">
+                        <p>✓ Gestão ilimitada de cheques dentista</p>
+                        <p>✓ Relatórios avançados</p>
+                        <p>✓ Suporte prioritário</p>
+                        <p>✓ Múltiplos utilizadores</p>
+                      </div>
+                      <div className="border-t pt-4 space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Período atual:</span>
+                          <span className="font-medium">{formatDate(subscription.current_period_start)} - {formatDate(subscription.current_period_end)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Renovação:</span>
+                          <span className="font-medium">{formatDate(subscription.current_period_end)}</span>
+                        </div>
+                        {subscription.cancel_at_period_end && (
+                          <div className="flex justify-between text-amber-600">
+                            <span>Status:</span>
+                            <span className="font-medium">Cancelará no final do período</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                      onClick={handleManageSubscription}
+                      disabled={loadingPortal}
+                    >
+                      {loadingPortal ? "A carregar..." : "Gerir Subscrição"}
+                    </Button>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-bold text-gray-700 mb-2">Sem subscrição ativa</h3>
+                    <p className="text-gray-600 mb-6">Subscreva para aceder a todas as funcionalidades</p>
+                    <Link href="/">
+                      <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold px-8 py-3 rounded-xl">
+                        Ver Planos
+                      </Button>
+                    </Link>
                   </div>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <p>✓ Gestão ilimitada de cheques dentista</p>
-                    <p>✓ Relatórios avançados</p>
-                    <p>✓ Suporte prioritário</p>
-                    <p>✓ Múltiplos utilizadores</p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -417,27 +538,6 @@ export default function AccountPage() {
                     <p className="text-sm text-gray-600">Médicos registados</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Upgrade Options Card */}
-            <Card className="border-2 border-teal-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <CardHeader className="bg-gradient-to-r from-violet-50/50 to-purple-50/50 rounded-t-2xl">
-                <CardTitle className="flex items-center gap-2">
-                  <Crown className="w-5 h-5 text-violet-600" />
-                  Opções de Upgrade
-                </CardTitle>
-                <CardDescription>
-                  Melhore o seu plano para mais funcionalidades
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <Button
-                  className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                  disabled
-                >
-                  Em breve - Novos planos disponíveis
-                </Button>
               </CardContent>
             </Card>
           </div>

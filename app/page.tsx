@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Clock, TrendingUp, Users, Sparkles, X, CheckCircle, TrendingDown, CheckCircle2 } from "lucide-react";
@@ -5,6 +8,19 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
+  const [pricingSelectedPlan, setPricingSelectedPlan] = useState<'monthly' | 'annual'>('annual');
+
+  const handleCheckout = () => {
+    // Redirect to sign-up with selected plan
+    window.location.href = `/auth/sign-up?plan=${selectedPlan}`;
+  };
+
+  const handlePricingCheckout = () => {
+    // Redirect to sign-up with selected plan
+    window.location.href = `/auth/sign-up?plan=${pricingSelectedPlan}`;
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header - Landing 1 Style */}
@@ -46,15 +62,44 @@ export default function Home() {
             Rastreie, analise e otimize o ciclo completo dos seus cheques dentista numa plataforma simples e poderosa.
           </p>
 
-          <Link href="/auth/sign-up">
-            <Button size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold text-xl px-12 py-8 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all">
-              Começar Agora
-              <ArrowRight className="ml-3 h-6 w-6" />
-            </Button>
-          </Link>
+          {/* Plan Toggle */}
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <button
+              onClick={() => setSelectedPlan('monthly')}
+              className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                selectedPlan === 'monthly'
+                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg scale-105'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Mensal
+            </button>
+            <button
+              onClick={() => setSelectedPlan('annual')}
+              className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                selectedPlan === 'annual'
+                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg scale-105'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Anual
+              <span className="ml-2 text-xs bg-amber-400 text-amber-900 px-2 py-1 rounded-full">
+                Poupe 17%
+              </span>
+            </button>
+          </div>
+
+          <Button
+            size="lg"
+            className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold text-xl px-12 py-8 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all"
+            onClick={handleCheckout}
+          >
+            Começar Agora
+            <ArrowRight className="ml-3 h-6 w-6" />
+          </Button>
 
           <p className="text-gray-500 mt-6 text-lg">
-            €19/mês ou €190/ano
+            {selectedPlan === 'monthly' ? '€19/mês' : '€190/ano (equivalente a €15,83/mês)'}
           </p>
         </div>
       </section>
@@ -280,20 +325,50 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl border-2 border-teal-100">
-                    <div className="mb-6">
+                  <div className="space-y-4">
+                    {/* Monthly Plan Card */}
+                    <button
+                      onClick={() => setPricingSelectedPlan('monthly')}
+                      className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-300 ${
+                        pricingSelectedPlan === 'monthly'
+                          ? 'bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-300 shadow-lg scale-105'
+                          : 'bg-gradient-to-br from-gray-50 to-white border-gray-200 hover:border-teal-200 hover:shadow-md'
+                      }`}
+                    >
                       <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-5xl font-extrabold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                        <span className={`text-4xl font-extrabold ${
+                          pricingSelectedPlan === 'monthly'
+                            ? 'bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent'
+                            : 'text-gray-700'
+                        }`}>
                           €19
                         </span>
                         <span className="text-gray-600 font-medium">/mês</span>
                       </div>
                       <p className="text-sm text-gray-500">faturado mensalmente</p>
-                    </div>
+                      {pricingSelectedPlan === 'monthly' && (
+                        <div className="mt-3 flex items-center gap-2 text-teal-600 font-semibold text-sm">
+                          <CheckCircle2 className="h-5 w-5" />
+                          Selecionado
+                        </div>
+                      )}
+                    </button>
 
-                    <div className="bg-teal-50 border-2 border-teal-200 rounded-xl p-4 mb-6">
+                    {/* Annual Plan Card */}
+                    <button
+                      onClick={() => setPricingSelectedPlan('annual')}
+                      className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-300 ${
+                        pricingSelectedPlan === 'annual'
+                          ? 'bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-300 shadow-lg scale-105'
+                          : 'bg-gradient-to-br from-gray-50 to-white border-gray-200 hover:border-teal-200 hover:shadow-md'
+                      }`}
+                    >
                       <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-3xl font-extrabold text-teal-700">
+                        <span className={`text-4xl font-extrabold ${
+                          pricingSelectedPlan === 'annual'
+                            ? 'bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent'
+                            : 'text-gray-700'
+                        }`}>
                           €190
                         </span>
                         <span className="text-gray-600 font-medium">/ano</span>
@@ -301,18 +376,23 @@ export default function Home() {
                       <p className="text-sm font-bold text-teal-700">
                         Poupe €38 por ano
                       </p>
-                    </div>
+                      {pricingSelectedPlan === 'annual' && (
+                        <div className="mt-3 flex items-center gap-2 text-teal-600 font-semibold text-sm">
+                          <CheckCircle2 className="h-5 w-5" />
+                          Selecionado
+                        </div>
+                      )}
+                    </button>
 
-                    <Link href="/auth/sign-up" className="block">
-                      <Button size="lg" className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold text-lg py-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
-                        Começar Agora
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                    </Link>
-
-                    <p className="text-center text-sm text-gray-500 mt-4">
-                      Cancele a qualquer momento
-                    </p>
+                    {/* Checkout Button */}
+                    <Button
+                      size="lg"
+                      onClick={handlePricingCheckout}
+                      className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold text-lg py-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                    >
+                      Começar Agora
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>

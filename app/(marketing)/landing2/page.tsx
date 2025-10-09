@@ -356,7 +356,7 @@ export default function Landing2() {
                     <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-6 border-2 border-teal-200">
                       <p className="text-gray-700 leading-relaxed mb-4">
                         Quando um paciente entrega um cheque dentista, regista-o imediatamente no sistema.
-                        O estado "Recebido" ativa automaticamente:
+                        O estado &ldquo;Recebido&rdquo; ativa automaticamente:
                       </p>
                       <ul className="space-y-2">
                         <li className="flex items-start gap-2">
@@ -389,7 +389,7 @@ export default function Landing2() {
                     </div>
                     <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 border-2 border-emerald-200">
                       <p className="text-gray-700 leading-relaxed mb-4">
-                        Quando o tratamento é concluído e o cheque é consumido, mude o estado para "Utilizado".
+                        Quando o tratamento é concluído e o cheque é consumido, mude o estado para &ldquo;Utilizado&rdquo;.
                         Isto prepara o cheque para:
                       </p>
                       <ul className="space-y-2">
@@ -423,7 +423,7 @@ export default function Landing2() {
                     </div>
                     <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-6 border-2 border-pink-200">
                       <p className="text-gray-700 leading-relaxed mb-4">
-                        O estado final do ciclo de vida. Quando marca como "Pago ao Médico":
+                        O estado final do ciclo de vida. Quando marca como &ldquo;Pago ao Médico&rdquo;:
                       </p>
                       <ul className="space-y-2">
                         <li className="flex items-start gap-2">

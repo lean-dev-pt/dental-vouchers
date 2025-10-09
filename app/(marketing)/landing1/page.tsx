@@ -119,7 +119,7 @@ export default function Landing1() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "Finalmente uma solução que entende o sistema português. Reduzimos o tempo administrativo em 70% e nunca mais perdemos um cheque."
+                  &ldquo;Finalmente uma solução que entende o sistema português. Reduzimos o tempo administrativo em 70% e nunca mais perdemos um cheque.&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -141,7 +141,7 @@ export default function Landing1() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "Os relatórios em tempo real mudaram completamente como gerimos os pagamentos da ARS. Visibilidade total em segundos."
+                  &ldquo;Os relatórios em tempo real mudaram completamente como gerimos os pagamentos da ARS. Visibilidade total em segundos.&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -163,7 +163,7 @@ export default function Landing1() {
                   ))}
                 </div>
                 <p className="text-gray-700 mb-4 italic">
-                  "Interface intuitiva e suporte excecional. Implementámos em menos de uma hora e toda a equipa adora usar."
+                  &ldquo;Interface intuitiva e suporte excecional. Implementámos em menos de uma hora e toda a equipa adora usar.&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">

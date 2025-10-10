@@ -27,6 +27,7 @@ export function SignUpForm({
   const [clinicName, setClinicName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
+  const [dpaConsent, setDpaConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -47,6 +48,12 @@ export function SignUpForm({
 
     if (!clinicName.trim()) {
       setError("O nome da clínica é obrigatório");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!dpaConsent) {
+      setError("Deve aceitar o Acordo de Processamento de Dados para continuar");
       setIsLoading(false);
       return;
     }
@@ -74,6 +81,7 @@ export function SignUpForm({
           clinicName: clinicName.trim(),
           ownerName: ownerName.trim() || undefined,
           phone: phone.trim() || undefined,
+          dpaConsent: dpaConsent,
         }),
       });
 
@@ -220,6 +228,27 @@ export function SignUpForm({
                     className="border-2 focus:border-teal-400"
                   />
                 </div>
+              </div>
+
+              {/* DPA Consent Checkbox */}
+              <div className="flex items-start gap-3 p-4 bg-teal-50 border-2 border-teal-200 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="dpa-consent"
+                  checked={dpaConsent}
+                  onChange={(e) => setDpaConsent(e.target.checked)}
+                  className="mt-1 h-5 w-5 text-teal-600 border-2 border-teal-300 rounded focus:ring-teal-500 focus:ring-2 cursor-pointer"
+                  required
+                />
+                <label htmlFor="dpa-consent" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
+                  <span className="font-semibold text-gray-900">Declaro que</span> a minha clínica obteve todos os consentimentos necessários
+                  dos pacientes e médicos dentistas para o tratamento dos seus dados pessoais, incluindo consentimento parental
+                  para menores de 16 anos, conforme o RGPD. Li e aceito o{" "}
+                  <Link href="/dpa" target="_blank" className="text-teal-600 font-semibold hover:underline">
+                    Acordo de Processamento de Dados
+                  </Link>
+                  .
+                </label>
               </div>
 
               {error && (

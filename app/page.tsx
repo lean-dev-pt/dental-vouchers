@@ -425,23 +425,28 @@ export default function Home() {
       <footer className="bg-gray-900 text-gray-400 py-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/logo.png"
-                alt="Cheques Dentista Logo"
-                width={32}
-                height={32}
-                className="rounded-xl"
-              />
-              <span className="text-sm font-bold text-white">Cheques Dentista</span>
+            <div className="flex flex-col items-center md:items-start gap-2">
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/logo.png"
+                  alt="Cheques Dentista Logo"
+                  width={32}
+                  height={32}
+                  className="rounded-xl"
+                />
+                <span className="text-sm font-bold text-white">Cheques Dentista</span>
+              </div>
+              <p className="text-xs text-gray-500">
+                The Lean Insight • NIPC: 509855423
+              </p>
             </div>
-            <p className="text-sm">
-              © 2025 Cheques Dentista. Feito em Portugal. RGPD Compliant.
+            <p className="text-sm text-center">
+              © 2025 The Lean Insight. Feito em Portugal. RGPD Compliant.
             </p>
             <div className="flex gap-6 text-sm">
-              <Link href="#" className="hover:text-teal-400 transition-colors">Privacidade</Link>
-              <Link href="#" className="hover:text-teal-400 transition-colors">Termos</Link>
-              <Link href="#" className="hover:text-teal-400 transition-colors">Contacto</Link>
+              <Link href="/privacy" className="hover:text-teal-400 transition-colors">Privacidade</Link>
+              <Link href="/terms" className="hover:text-teal-400 transition-colors">Termos</Link>
+              <a href="mailto:info@lean-consultores.com" className="hover:text-teal-400 transition-colors">Contacto</a>
             </div>
           </div>
         </div>

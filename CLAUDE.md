@@ -1,8 +1,87 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.04** - Simplified Onboarding Flow
+**Version: 1.06** - GDPR Compliance & Promo Codes
 
 ## 📝 Version History
+
+### Version 1.06 - GDPR Compliance & Promo Codes
+**Release Date**: January 10, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Implemented comprehensive GDPR compliance documentation for EU market launch
+- Added Stripe promo code support for €1 first-month promotional offers
+- Fixed middleware redirect blocking public legal pages
+- Established processor/controller relationship with clinics per GDPR Article 28
+
+**Files Modified:**
+- [lib/stripe/server.ts](lib/stripe/server.ts) - No changes (promo codes use native Stripe feature)
+- [app/api/stripe/checkout/route.ts](app/api/stripe/checkout/route.ts:72) - Added `allow_promotion_codes: true`
+- [app/privacy/page.tsx](app/privacy/page.tsx) - NEW: Comprehensive GDPR privacy policy in Portuguese
+- [app/terms/page.tsx](app/terms/page.tsx) - NEW: Terms of Service with processor/controller terms
+- [app/dpa/page.tsx](app/dpa/page.tsx) - NEW: GDPR Article 28 compliant Data Processing Agreement
+- [app/page.tsx](app/page.tsx:424-453) - Updated footer with legal links and The Lean Insight company info
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:30,55-59,84,233-252) - Added DPA consent checkbox and validation
+- [app/api/onboarding/route.ts](app/api/onboarding/route.ts:6,16-21,52-54) - Added consent tracking and storage
+- [lib/supabase/middleware.ts](lib/supabase/middleware.ts:50-67) - Whitelisted public routes (/privacy, /terms, /dpa)
+
+**Database Changes:**
+- Added `data_processing_consent: BOOLEAN` to clinics table
+- Added `data_processing_consent_date: TIMESTAMPTZ` to clinics table
+
+**Features Added:**
+- **Stripe Promo Codes**: Clinics can use single-use promotion codes at checkout (e.g., €1 first month)
+- **Privacy Policy**: Full GDPR-compliant privacy policy explaining data minimization approach
+- **Terms of Service**: Defines The Lean Insight as processor, clinics as data controllers
+- **Data Processing Agreement**: GDPR Article 28 compliant DPA with clinic obligations
+- **DPA Consent Tracking**: Clinics must accept DPA during onboarding, tracked in database
+- **Public Legal Pages**: Privacy, Terms, and DPA accessible without authentication
+
+**Legal Entity Information:**
+- Company: The Lean Insight
+- Address: Avenida da República, 52, 7 | 1050-196 Lisboa
+- NIPC: 509855423
+- Email: info@lean-consultores.com
+
+**GDPR Compliance:**
+- Minimal data collection (name + year of birth for patients, name for doctors)
+- Processor/Controller relationship clearly defined
+- 5-year data retention policy per Portuguese healthcare law
+- Public access to privacy documentation
+- Consent tracking and audit trail
+
+**Performance Improvements:**
+- Build successful with 27 routes (3 new legal pages)
+- All pages load without authentication barriers where appropriate
+
+---
+
+### Version 1.05 - Stripe Build Fix
+**Release Date**: January 10, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Fixed Vercel build error: "Neither apiKey nor config.authenticator provided"
+- Stripe initialization now works during build phase
+- Production deployment now successful
+
+**Files Modified:**
+- [lib/stripe/server.ts](lib/stripe/server.ts:3-9) - Added fallback placeholder key for build-time initialization
+
+**Technical Details:**
+- Stripe client was failing during build because env vars aren't available at build time
+- Solution: Use placeholder key during build, real key at runtime
+- This is safe because API routes only execute at runtime with real keys
+
+**Deployment Notes:**
+- Ensure Stripe environment variables are set in Vercel for both staging and production:
+  - STRIPE_SECRET_KEY (test for staging, live for production)
+  - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  - STRIPE_PRICE_ID_MONTHLY
+  - STRIPE_PRICE_ID_ANNUAL
+  - STRIPE_WEBHOOK_SECRET
+
+---
 
 ### Version 1.04 - Simplified Onboarding Flow
 **Release Date**: January 10, 2025

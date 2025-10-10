@@ -3,12 +3,19 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { clinicName, ownerName } = await req.json();
+    const { clinicName, ownerName, dpaConsent } = await req.json();
 
     // Validate required fields
     if (!clinicName || clinicName.trim() === '') {
       return NextResponse.json(
         { error: 'Clinic name is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!dpaConsent) {
+      return NextResponse.json(
+        { error: 'DPA consent is required' },
         { status: 400 }
       );
     }
@@ -38,11 +45,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create clinic
+    // Create clinic with DPA consent
     const { data: clinic, error: clinicError } = await supabase
       .from('clinics')
       .insert({
         name: clinicName.trim(),
+        data_processing_consent: dpaConsent,
+        data_processing_consent_date: new Date().toISOString(),
       })
       .select()
       .single();

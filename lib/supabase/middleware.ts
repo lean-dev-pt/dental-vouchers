@@ -57,12 +57,21 @@ export async function updateSession(request: NextRequest) {
 
   const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname) ||
     request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/auth");
+    request.nextUrl.pathname.startsWith("/auth") ||
+    request.nextUrl.pathname.startsWith("/admin/login");
 
   if (!user && !isPublicRoute) {
-    // no user, potentially respond by redirecting the user to the login page
+    // Redirect based on which area user is trying to access
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+
+    // Admin routes redirect to admin login
+    if (request.nextUrl.pathname.startsWith("/admin")) {
+      url.pathname = "/admin/login";
+    } else {
+      // Dashboard and other protected routes redirect to regular login
+      url.pathname = "/auth/login";
+    }
+
     return NextResponse.redirect(url);
   }
 

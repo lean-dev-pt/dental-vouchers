@@ -1,8 +1,101 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.06** - GDPR Compliance & Promo Codes
+**Version: 1.08** - Restructured Support Center & Ticket Resolution System
 
 ## 📝 Version History
+
+### Version 1.08 - Restructured Support Center & Ticket Resolution System
+**Release Date**: January 10, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Restructured help page with sticky category navigation and grouped articles
+- Fixed card elevation overlap issues on hover
+- Implemented ticket resolution workflow with read-only states
+- Added ability for users and admins to mark tickets as resolved and reopen them
+- Fixed admin support page ticket fetching error
+- Created missing /admin route redirect
+
+**Files Modified:**
+- [app/dashboard/support/page.tsx](app/dashboard/support/page.tsx:319-334,355-438,655-766) - Redesigned tabs to compact pills, added sticky category navigation, grouped articles by category, implemented ticket resolution buttons and handlers
+- [components/ui/separator.tsx](components/ui/separator.tsx) - NEW: Installed separator component from shadcn
+- [app/admin/page.tsx](app/admin/page.tsx) - NEW: Created admin index page that redirects to /admin/support
+- [app/admin/support/page.tsx](app/admin/support/page.tsx:123-162) - Fixed ticket fetching by removing problematic JOIN and fetching profiles separately
+
+**Database Changes:**
+- Migration: `add_ticket_resolution_tracking` - Added resolved_at, resolved_by, reopened_at, reopened_by columns to support_tickets
+- Migration: `allow_ticket_status_updates` - Added RLS policy allowing users to update their ticket status
+- Added 2 new support articles: "Como criar um paciente" and "Como criar um médico" to getting-started category
+
+**Features Added:**
+- **Structured Help Page**:
+  - Sticky category navigation pills with icons and article counts
+  - Articles grouped by category with visual section headers
+  - Smooth scroll to category sections
+  - Increased gap between cards to prevent hover overlap
+  - Click articles to view full content in modal dialog
+- **Elegant Tab Design**:
+  - Compact pill-style tabs replacing large full-width tabs
+  - Fixed text from "Meus Tickets" to "Os Meus Tickets"
+  - Beautiful gradient backgrounds and smooth transitions
+- **Ticket Resolution System**:
+  - "Marcar como Resolvido" button for customers and admins
+  - "Reabrir Ticket" button for resolved tickets
+  - Read-only state for resolved/closed tickets (no reply textarea)
+  - Visual notices for resolved (green) and closed (gray) statuses
+  - Timestamp tracking for resolution and reopening actions
+- **Admin Route Fix**: Created /admin route that redirects to /admin/support
+
+**Performance Improvements:**
+- Build successful with 30 routes, 0 errors
+- Card hover effects now contained without overlapping neighbors
+- Smooth animations and transitions throughout support center
+- Optimized article fetching and display
+
+---
+
+### Version 1.07 - Separated Admin/User Authentication & Fixed RLS Recursion
+**Release Date**: October 10, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Separated authentication flows for support admins and clinic users
+- Fixed infinite RLS recursion on profiles, support_tickets, support_messages, and clinics tables
+- Support admins now have dedicated login page and dashboard access
+- Eliminated 500 errors caused by recursive RLS policy checks
+
+**Files Modified:**
+- [lib/supabase/middleware.ts](lib/supabase/middleware.ts:61,68-73) - Added `/admin/login` to public routes, admin routes redirect to `/admin/login` when unauthenticated
+- [components/login-form.tsx](components/login-form.tsx:42-60) - Added role-based redirect logic (support_admin → `/admin/support`, others → `/dashboard`)
+- [app/admin/login/page.tsx](app/admin/login/page.tsx:3) - Removed unused import
+- [app/admin/support/page.tsx](app/admin/support/page.tsx:95,111) - Changed redirects to `/admin/login` for unauthenticated and `/` for non-admins
+- [app/dashboard/vouchers/page.tsx](app/dashboard/vouchers/page.tsx:334-337) - Added support_admin redirect to `/admin/support`
+
+**Database Changes:**
+- Migration: `fix_profiles_rls_infinite_recursion` - Removed recursive SELECT policy on profiles table
+- Migration: `simplify_profiles_rls_final` - Cleaned up profiles RLS policies
+- Migration: `fix_support_tickets_rls_recursion_v2` - Created `public.is_support_admin()` SECURITY DEFINER function, updated support_tickets and support_messages policies
+- Migration: `fix_all_remaining_rls_recursion` - Fixed clinics table RLS policies, added support admin view access
+
+**Features Added:**
+- **Separate Authentication Paths**:
+  - Clinic users: `/` → `/auth/login` → `/dashboard`
+  - Support admins: `/admin` → `/admin/login` → `/admin/support`
+- **Role-Based Routing**: Automatic redirect based on user role after login
+- **RLS Function**: Created `public.is_support_admin()` to safely check admin status without recursion
+- **Admin Access to All Data**: Support admins can view all clinics, tickets, and messages
+
+**Technical Details:**
+- SECURITY DEFINER function bypasses RLS when checking user role, preventing infinite recursion
+- Simplified RLS policies: users view own data, support admins view all data
+- Middleware now routes based on URL path (`/admin/*` vs `/dashboard/*`)
+
+**Performance Improvements:**
+- Build successful with 29 routes, 0 errors
+- Eliminated 500 server errors from RLS recursion
+- Faster query execution without recursive policy checks
+
+---
 
 ### Version 1.06 - GDPR Compliance & Promo Codes
 **Release Date**: January 10, 2025

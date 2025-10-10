@@ -330,6 +330,12 @@ export default function VouchersPage() {
       return;
     }
 
+    // Redirect support admins to admin dashboard
+    if (profile.role === "support_admin") {
+      redirect("/admin/support");
+      return;
+    }
+
     setClinicId(profile.clinic_id);
     await loadVouchers();
   };

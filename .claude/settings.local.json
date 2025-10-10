@@ -27,7 +27,9 @@
       "Bash(gh repo create:*)",
       "Bash(git checkout:*)",
       "Bash(git push:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

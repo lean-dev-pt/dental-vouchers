@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { LogIn } from "lucide-react";
 
 export function LoginForm({
   className,
@@ -38,8 +39,26 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/dashboard");
+
+      // Check user role to determine redirect destination
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("user_id", userData.user.id)
+          .single();
+
+        // Redirect support admins to admin area
+        if (profile?.role === "support_admin") {
+          router.push("/admin/support");
+        } else {
+          // Regular users go to dashboard
+          router.push("/dashboard");
+        }
+      } else {
+        router.push("/dashboard");
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -49,18 +68,27 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Entrar</CardTitle>
-          <CardDescription>
-            Introduza o seu email para aceder à sua conta
-          </CardDescription>
+      <Card className="border-2 border-teal-200 shadow-2xl">
+        <CardHeader className="space-y-4 pb-8">
+          <div className="flex items-center justify-center">
+            <div className="bg-gradient-to-br from-teal-100 to-cyan-100 p-4 rounded-2xl">
+              <LogIn className="h-10 w-10 text-teal-600" />
+            </div>
+          </div>
+          <div className="text-center">
+            <CardTitle className="text-3xl font-extrabold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              Entrar
+            </CardTitle>
+            <CardDescription className="text-base mt-2">
+              Introduza o seu email para aceder à sua conta
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-5">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="font-semibold">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -68,14 +96,15 @@ export function LoginForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="border-2 focus:border-teal-400"
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Palavra-passe</Label>
+                  <Label htmlFor="password" className="font-semibold">Palavra-passe</Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-sm text-teal-600 hover:text-teal-700 underline-offset-4 hover:underline"
                   >
                     Esqueceu-se da palavra-passe?
                   </Link>
@@ -86,18 +115,27 @@ export function LoginForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="border-2 focus:border-teal-400"
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              {error && (
+                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                  <p className="text-sm text-red-600 font-medium">{error}</p>
+                </div>
+              )}
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold text-lg py-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all mt-2"
+                disabled={isLoading}
+              >
                 {isLoading ? "A entrar..." : "Entrar"}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-6 text-center text-sm">
               Ainda não tem conta?{" "}
               <Link
                 href="/auth/sign-up"
-                className="underline underline-offset-4"
+                className="text-teal-600 hover:text-teal-700 font-semibold underline underline-offset-4"
               >
                 Registar
               </Link>

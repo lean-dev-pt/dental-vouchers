@@ -158,12 +158,13 @@ export function SignUpForm({
 
                 <div className="grid gap-2">
                   <Label htmlFor="owner-name" className="font-semibold">
-                    Nome do Responsável <span className="text-gray-400 text-xs">(opcional)</span>
+                    Nome do Responsável <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="owner-name"
                     type="text"
                     placeholder="ex: Dr. João Silva"
+                    required
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
                     className="border-2 focus:border-teal-400"

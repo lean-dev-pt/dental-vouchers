@@ -12,7 +12,8 @@ import {
   User2,
   ChevronUp,
   LogOut,
-  Activity
+  Activity,
+  HelpCircle
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,13 @@ const navItems = [
     icon: Activity,
     gradient: "from-blue-500 to-indigo-500",
     hoverGradient: "hover:from-blue-600 hover:to-indigo-600"
+  },
+  {
+    title: "Suporte",
+    href: "/dashboard/support",
+    icon: HelpCircle,
+    gradient: "from-pink-500 to-rose-500",
+    hoverGradient: "hover:from-pink-600 hover:to-rose-600"
   },
 ];
 

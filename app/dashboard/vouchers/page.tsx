@@ -16,7 +16,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, Search, Clock, HandHeart, CheckCircle, Send, Banknote, UserCheck, Receipt, Calendar, AlertTriangle } from "lucide-react";
+import { ArrowUpDown, Search, Clock, HandHeart, CheckCircle, Send, Banknote, UserCheck, Receipt, Calendar, AlertTriangle, Mail } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -34,6 +34,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Voucher {
   id: string;
@@ -121,6 +130,7 @@ export default function VouchersPage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [dateRange, setDateRange] = useState<string>("all");
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
 
   const columns = useMemo<ColumnDef<Voucher>[]>(
     () => [
@@ -312,6 +322,11 @@ export default function VouchersPage() {
 
     console.log("Authenticated user:", user.email, user.id);
 
+    // Check if email is confirmed
+    if (!user.email_confirmed_at) {
+      setShowEmailVerification(true);
+    }
+
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("*")
@@ -487,9 +502,38 @@ export default function VouchersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Modern Healthcare Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-400 p-10 text-white shadow-2xl">
+    <>
+      {/* Email Verification Alert Dialog */}
+      <AlertDialog open={showEmailVerification} onOpenChange={setShowEmailVerification}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex justify-center mb-4">
+              <div className="bg-gradient-to-br from-amber-100 to-orange-100 p-4 rounded-full">
+                <Mail className="h-10 w-10 text-amber-600" />
+              </div>
+            </div>
+            <AlertDialogTitle className="text-center text-2xl">
+              Confirme o seu email
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base">
+              Por favor, verifique o seu email para confirmar a sua conta.
+              Enviámos-lhe um link de confirmação para o seu endereço de email.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogAction
+              onClick={() => setShowEmailVerification(false)}
+              className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
+            >
+              Continuar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="space-y-6">
+        {/* Modern Healthcare Header */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-400 p-10 text-white shadow-2xl">
         <div className="absolute -top-20 -right-20 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl"></div>
         <div className="relative z-10">
@@ -742,5 +786,6 @@ export default function VouchersPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -1,11 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
+
+// Create admin Supabase client with service role key (bypasses RLS and auth checks)
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
 
 export async function POST(req: NextRequest) {
   try {
-    const { clinicName, ownerName, dpaConsent } = await req.json();
+    const { userId, email, clinicName, ownerName, dpaConsent } = await req.json();
 
     // Validate required fields
+    if (!userId || !email) {
+      return NextResponse.json(
+        { error: 'User ID and email are required' },
+        { status: 400 }
+      );
+    }
+
     if (!clinicName || clinicName.trim() === '') {
       return NextResponse.json(
         { error: 'Clinic name is required' },
@@ -20,22 +39,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get authenticated user
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     // Check if user already has a profile/clinic
-    const { data: existingProfile } = await supabase
+    const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
       .select('id, clinic_id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (existingProfile) {
@@ -46,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create clinic with DPA consent
-    const { data: clinic, error: clinicError } = await supabase
+    const { data: clinic, error: clinicError } = await supabaseAdmin
       .from('clinics')
       .insert({
         name: clinicName.trim(),
@@ -65,13 +73,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Create profile
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         clinic_id: clinic.id,
         role: 'admin', // First user is always admin
-        name: ownerName?.trim() || user.email?.split('@')[0] || 'Admin',
+        name: ownerName?.trim() || email?.split('@')[0] || 'Admin',
       })
       .select()
       .single();
@@ -79,7 +87,7 @@ export async function POST(req: NextRequest) {
     if (profileError || !profile) {
       console.error('Error creating profile:', profileError);
       // Rollback: delete clinic if profile creation fails
-      await supabase.from('clinics').delete().eq('id', clinic.id);
+      await supabaseAdmin.from('clinics').delete().eq('id', clinic.id);
       return NextResponse.json(
         { error: 'Failed to create profile' },
         { status: 500 }

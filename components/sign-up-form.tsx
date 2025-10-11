@@ -78,6 +78,8 @@ export function SignUpForm({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          userId: authData.user.id,
+          email: authData.user.email,
           clinicName: clinicName.trim(),
           ownerName: ownerName.trim() || undefined,
           phone: phone.trim() || undefined,

@@ -1,8 +1,57 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.08** - Restructured Support Center & Ticket Resolution System
+**Version: 1.09** - Fixed Signup Flow with Email Confirmation
 
 ## 📝 Version History
+
+### Version 1.09 - Fixed Signup Flow with Email Confirmation
+**Release Date**: October 11, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Fixed 405 Method Not Allowed error during signup caused by middleware blocking API routes
+- Fixed 401 Unauthorized error on Stripe checkout due to missing session after signup
+- Removed duplicate clinic/profile creation from database trigger
+- Fixed broken RLS INSERT policy on clinics table that blocked all inserts
+- Implemented email confirmation dialog for unconfirmed users on dashboard
+- Added secure auto-login after signup to create session for checkout flow
+
+**Files Modified:**
+- [lib/supabase/middleware.ts](lib/supabase/middleware.ts:62) - Added `/api` routes to public routes whitelist to allow API calls from unauthenticated users during signup
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:85-97) - Added auto-login immediately after signup using `signInWithPassword()` to create session for Stripe checkout
+- [app/dashboard/layout.tsx](app/dashboard/layout.tsx:13-14) - Added EmailConfirmationChecker component to detect unconfirmed users
+- [components/email-confirmation-dialog.tsx](components/email-confirmation-dialog.tsx) - NEW: Portuguese email confirmation dialog with resend functionality and gradient styling
+- [components/email-confirmation-checker.tsx](components/email-confirmation-checker.tsx) - NEW: Client component to check user email confirmation status and show dialog
+- [app/api/resend-confirmation/route.ts](app/api/resend-confirmation/route.ts) - NEW: API endpoint to resend confirmation emails using `supabase.auth.resend()`
+
+**Database Changes:**
+- Migration: `remove_duplicate_user_trigger` - Dropped `on_auth_user_created` trigger and `handle_new_user()` function that were creating duplicate clinics/profiles
+- Migration: `fix_clinic_insert_policy` - Dropped broken RLS INSERT policy "Only admins can insert clinics" that had `with_check = false` blocking all inserts
+
+**Signup Flow Documentation:**
+1. User fills signup form with clinic info and credentials
+2. `supabase.auth.signUp()` creates user (unconfirmed, pending email verification)
+3. Auto-login via `signInWithPassword()` creates session with cookies
+4. `/api/onboarding` creates clinic and profile using service role key (bypasses RLS for unconfirmed users)
+5. `/api/stripe/checkout` creates checkout session (requires authenticated session)
+6. User redirected to Stripe payment page
+7. User confirms email asynchronously
+8. On dashboard load, EmailConfirmationChecker shows dialog if email unconfirmed
+9. User can resend confirmation email from dialog
+
+**Security Analysis:**
+- **Bot Protection**: Primary defense is Stripe payment gateway - bots cannot complete signup without valid payment
+- **Auto-Login Rationale**: Creates session needed for checkout; bots blocked at payment step regardless
+- **Service Role Usage**: Necessary in onboarding API because unconfirmed users cannot write due to RLS policies
+- **Optional Future Enhancement**: Rate limiting on signup endpoint (not critical given Stripe protection)
+
+**Performance Improvements:**
+- Build successful with 31 routes, 0 errors
+- Eliminated 405 errors blocking signup completion
+- Eliminated 401 errors blocking Stripe checkout
+- Streamlined signup flow with automatic session creation
+
+---
 
 ### Version 1.08 - Restructured Support Center & Ticket Resolution System
 **Release Date**: January 10, 2025

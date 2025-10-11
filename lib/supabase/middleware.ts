@@ -58,7 +58,8 @@ export async function updateSession(request: NextRequest) {
   const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname) ||
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/auth") ||
-    request.nextUrl.pathname.startsWith("/admin/login");
+    request.nextUrl.pathname.startsWith("/admin/login") ||
+    request.nextUrl.pathname.startsWith("/api"); // API routes handle their own auth
 
   if (!user && !isPublicRoute) {
     // Redirect based on which area user is trying to access

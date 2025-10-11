@@ -60,6 +60,7 @@ export function SignUpForm({
 
     try {
       // Step 1: Sign up the user
+      console.log("Attempting signup with email:", email);
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -68,8 +69,18 @@ export function SignUpForm({
         },
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Falha ao criar utilizador");
+      console.log("Signup response:", { authData, authError });
+
+      if (authError) {
+        console.error("Signup error:", authError);
+        throw authError;
+      }
+      if (!authData.user) {
+        console.error("No user in signup response");
+        throw new Error("Falha ao criar utilizador");
+      }
+
+      console.log("User created successfully:", authData.user.id);
 
       // Step 2: Create clinic and profile via onboarding API
       const onboardingRes = await fetch('/api/onboarding', {

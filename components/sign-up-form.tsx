@@ -82,6 +82,20 @@ export function SignUpForm({
 
       console.log("User created successfully:", authData.user.id);
 
+      // Step 1.5: Auto-login user to create session (needed for checkout)
+      console.log("Auto-logging in user...");
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        console.error("Auto-login error:", signInError);
+        throw new Error("Erro ao fazer login automático");
+      }
+
+      console.log("User logged in successfully");
+
       // Step 2: Create clinic and profile via onboarding API
       const onboardingRes = await fetch('/api/onboarding', {
         method: 'POST',

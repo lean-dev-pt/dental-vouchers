@@ -97,7 +97,7 @@ export function SignUpForm({
         throw new Error(errorMessage);
       }
 
-      const onboardingData = await onboardingRes.json();
+      await onboardingRes.json(); // Consume the response
 
       // Step 3: Redirect to Stripe checkout with plan
       const checkoutRes = await fetch('/api/stripe/checkout', {

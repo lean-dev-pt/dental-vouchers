@@ -1,6 +1,7 @@
 import { AuthButton } from "@/components/auth-button";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { ClinicNameDisplay } from "@/components/dashboard/clinic-name-display";
+import { EmailConfirmationChecker } from "@/components/email-confirmation-checker";
 
 export default function DashboardLayout({
   children,
@@ -9,6 +10,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-teal-50/70 via-white to-cyan-50/70">
+      {/* Email Confirmation Dialog */}
+      <EmailConfirmationChecker />
+
       {/* Sidebar */}
       <SidebarNav />
 

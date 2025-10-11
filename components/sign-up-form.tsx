@@ -85,11 +85,19 @@ export function SignUpForm({
         }),
       });
 
-      const onboardingData = await onboardingRes.json();
-
       if (!onboardingRes.ok) {
-        throw new Error(onboardingData.error || 'Erro ao criar clínica');
+        const errorText = await onboardingRes.text();
+        let errorMessage = 'Erro ao criar clínica';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
+
+      const onboardingData = await onboardingRes.json();
 
       // Step 3: Redirect to Stripe checkout with plan
       const checkoutRes = await fetch('/api/stripe/checkout', {
@@ -100,12 +108,24 @@ export function SignUpForm({
         body: JSON.stringify({ planType: plan }),
       });
 
+      if (!checkoutRes.ok) {
+        const errorText = await checkoutRes.text();
+        let errorMessage = 'Erro ao iniciar checkout';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
       const checkoutData = await checkoutRes.json();
 
       if (checkoutData.url) {
         window.location.href = checkoutData.url;
       } else {
-        throw new Error(checkoutData.error || 'Erro ao iniciar checkout');
+        throw new Error('Erro ao iniciar checkout');
       }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ocorreu um erro");
@@ -239,7 +259,6 @@ export function SignUpForm({
                   checked={dpaConsent}
                   onChange={(e) => setDpaConsent(e.target.checked)}
                   className="mt-1 h-5 w-5 text-teal-600 border-2 border-teal-300 rounded focus:ring-teal-500 focus:ring-2 cursor-pointer"
-                  required
                 />
                 <label htmlFor="dpa-consent" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
                   <span className="font-semibold text-gray-900">Declaro que</span> a minha clínica obteve todos os consentimentos necessários

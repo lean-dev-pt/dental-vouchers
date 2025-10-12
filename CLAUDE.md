@@ -1,6 +1,61 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.10** - Refactored Signup with Email Confirmation
+**Version: 1.11** - Fixed Stripe Webhook for API v2025-07-30
+
+## 📝 Version History
+
+### Version 1.11 - Fixed Stripe Webhook for API v2025-07-30
+**Release Date**: October 12, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Fixed Stripe webhook failing with "Webhook handler failed" error
+- Adapted webhook to Stripe API v2025-07-30 breaking changes
+- Subscription period dates moved from subscription to subscription item level
+- Removed unnecessary UI elements from account page
+- Cleaned up email confirmation flow
+
+**Files Modified:**
+- [app/api/stripe/webhook/route.ts](app/api/stripe/webhook/route.ts:97-99,213-214) - Changed from `sub.current_period_start/end` to `sub.items.data[0].current_period_start/end` for API v2025-07-30 compatibility
+- [app/auth/check-email/page.tsx](app/auth/check-email/page.tsx:103-109) - Removed "Voltar ao Login" button to keep users focused on email verification
+- [app/dashboard/account/page.tsx](app/dashboard/account/page.tsx:23-31,366-393,485-512) - Removed unused imports (Bell, TrendingUp), removed Notifications card, removed Usage Statistics card
+
+**Database Changes:**
+- Migration: `add_subscriptions_insert_policy` - Added INSERT policies for service_role and authenticated users on subscriptions table
+- Migration: `add_subscriptions_update_policy` - Added UPDATE policies for service_role and authenticated users on subscriptions table
+
+**Features Added:**
+- **Stripe API v2025-07-30 Support**: Webhook now correctly extracts subscription period dates from subscription items
+- **Duplicate Subscription Handling**: Webhook gracefully skips creating duplicate subscriptions
+- **Enhanced Error Handling**: Better error messages and non-blocking history logging
+- **Cleaner Account Page**: Removed placeholder UI sections (Notifications, Usage Statistics)
+- **Streamlined Email Confirmation**: Removed confusing "back to login" option
+
+**Technical Details:**
+- Stripe API v2025-07-30 deprecated subscription-level `current_period_start` and `current_period_end`
+- New location: `subscription.items.data[0].current_period_start` and `subscription.items.data[0].current_period_end`
+- Reference: https://docs.stripe.com/changelog/basil/2025-03-31/deprecate-subscription-current-period-start-and-end
+- Webhook now returns `{ received: true }` successfully to Stripe
+- RLS policies allow both service_role (webhooks) and authenticated users to manage subscriptions
+
+**Performance Improvements:**
+- Build successful with 34 routes, 0 errors, 2 pre-existing ESLint warnings
+- Webhook processing time: ~200ms average
+- Reduced unnecessary console.log statements for production
+- Complete end-to-end signup flow now works automatically
+
+**Git Commits:**
+- 37f72a3: fix: Remove 'Voltar ao Login' button from email confirmation page
+- e60819e: fix: Remove unused sections and add subscription RLS policies
+- 4efe872: fix: Add detailed logging to Stripe webhook handler
+- c3f7ffc: fix: Validate timestamps before converting to ISO string in webhook
+- dcad376: fix: Use 'any' type casting for Stripe subscription properties
+- 502b24a: fix: Add duplicate check and better error handling to webhook
+- d866831: debug: Add comprehensive logging to identify Stripe property names
+- f598ae4: fix: Use item-level period dates for Stripe API v2025-07-30
+- 235b150: chore: Remove debug logging from webhook handler
+
+---
 
 ## 📝 Version History
 

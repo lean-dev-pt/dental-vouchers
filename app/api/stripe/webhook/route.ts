@@ -110,9 +110,9 @@ export async function POST(req: NextRequest) {
           const subscriptionStatus = sub.status;
           const cancelAtPeriodEnd = sub.cancel_at_period_end || sub.cancelAtPeriodEnd;
 
-          // Try different possible property names for period dates
-          const currentPeriodStart = sub.current_period_start || sub.currentPeriodStart || sub.start_date || sub.billing_cycle_anchor;
-          const currentPeriodEnd = sub.current_period_end || sub.currentPeriodEnd;
+          // In API v2025-07-30, period dates moved to subscription item level
+          const currentPeriodStart = sub.items?.data?.[0]?.current_period_start;
+          const currentPeriodEnd = sub.items?.data?.[0]?.current_period_end;
           const priceId = sub.items?.data?.[0]?.price?.id;
 
           console.log('Extracted subscription data:', {
@@ -205,13 +205,13 @@ export async function POST(req: NextRequest) {
           .eq('stripe_subscription_id', sub.id)
           .single();
 
-        // Update subscription
+        // Update subscription (using item-level period dates for API v2025-07-30)
         const { error } = await supabaseAdmin
           .from('subscriptions')
           .update({
             status: sub.status,
-            current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
-            current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+            current_period_start: new Date(sub.items?.data?.[0]?.current_period_start * 1000).toISOString(),
+            current_period_end: new Date(sub.items?.data?.[0]?.current_period_end * 1000).toISOString(),
             cancel_at_period_end: sub.cancel_at_period_end,
             canceled_at: sub.canceled_at
               ? new Date(sub.canceled_at * 1000).toISOString()

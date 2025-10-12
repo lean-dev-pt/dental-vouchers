@@ -53,6 +53,9 @@ export async function updateSession(request: NextRequest) {
     "/privacy",
     "/terms",
     "/dpa",
+    "/auth/callback",
+    "/auth/check-email",
+    "/onboarding",
   ];
 
   const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname) ||

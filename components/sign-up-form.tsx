@@ -59,13 +59,20 @@ export function SignUpForm({
     }
 
     try {
-      // Step 1: Sign up the user
+      // Sign up the user with clinic info in metadata
       console.log("Attempting signup with email:", email);
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            clinicName: clinicName.trim(),
+            ownerName: ownerName.trim() || null,
+            phone: phone.trim() || null,
+            dpaConsent: dpaConsent,
+            plan: plan,
+          },
         },
       });
 
@@ -82,79 +89,10 @@ export function SignUpForm({
 
       console.log("User created successfully:", authData.user.id);
 
-      // Step 1.5: Auto-login user to create session (needed for checkout)
-      console.log("Auto-logging in user...");
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        console.error("Auto-login error:", signInError);
-        throw new Error("Erro ao fazer login automático");
-      }
-
-      console.log("User logged in successfully");
-
-      // Step 2: Create clinic and profile via onboarding API
-      const onboardingRes = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: authData.user.id,
-          email: authData.user.email,
-          clinicName: clinicName.trim(),
-          ownerName: ownerName.trim() || undefined,
-          phone: phone.trim() || undefined,
-          dpaConsent: dpaConsent,
-        }),
-      });
-
-      if (!onboardingRes.ok) {
-        const errorText = await onboardingRes.text();
-        let errorMessage = 'Erro ao criar clínica';
-        try {
-          const errorJson = JSON.parse(errorText);
-          errorMessage = errorJson.error || errorMessage;
-        } catch {
-          errorMessage = errorText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
-
-      await onboardingRes.json(); // Consume the response
-
-      // Step 3: Redirect to Stripe checkout with plan
-      const checkoutRes = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planType: plan }),
-      });
-
-      if (!checkoutRes.ok) {
-        const errorText = await checkoutRes.text();
-        let errorMessage = 'Erro ao iniciar checkout';
-        try {
-          const errorJson = JSON.parse(errorText);
-          errorMessage = errorJson.error || errorMessage;
-        } catch {
-          errorMessage = errorText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
-
-      const checkoutData = await checkoutRes.json();
-
-      if (checkoutData.url) {
-        window.location.href = checkoutData.url;
-      } else {
-        throw new Error('Erro ao iniciar checkout');
-      }
+      // Redirect to check-email page
+      window.location.href = `/auth/check-email?email=${encodeURIComponent(email)}`;
     } catch (error: unknown) {
+      console.error("Signup error:", error);
       setError(error instanceof Error ? error.message : "Ocorreu um erro");
       setIsLoading(false);
     }

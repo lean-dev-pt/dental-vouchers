@@ -88,18 +88,30 @@ export async function POST(req: NextRequest) {
             throw new Error(error);
           }
 
-          // Extract subscription data for insert (using explicit property access)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const sub = stripeSubscription as any;
-          const currentPeriodStart = sub.current_period_start;
-          const currentPeriodEnd = sub.current_period_end;
-          const cancelAtPeriodEnd = sub.cancel_at_period_end;
-          const subscriptionStatus = sub.status;
-          const customerId = sub.customer as string;
-          const subscriptionId = sub.id;
-          const priceId = sub.items.data[0].price.id;
+          // Extract subscription data safely
+          const customerId = typeof stripeSubscription.customer === 'string'
+            ? stripeSubscription.customer
+            : stripeSubscription.customer.id;
+          const subscriptionId = stripeSubscription.id;
+          const subscriptionStatus = stripeSubscription.status;
+          const cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
+          const currentPeriodStart = stripeSubscription.current_period_start;
+          const currentPeriodEnd = stripeSubscription.current_period_end;
+          const priceId = stripeSubscription.items.data[0]?.price?.id;
 
-          console.log('Creating subscription record:', { clinicId, subscriptionId, customerId });
+          console.log('Subscription data:', {
+            clinicId,
+            subscriptionId,
+            customerId,
+            currentPeriodStart,
+            currentPeriodEnd,
+            priceId
+          });
+
+          // Validate required fields
+          if (!currentPeriodStart || !currentPeriodEnd) {
+            throw new Error(`Missing period dates: start=${currentPeriodStart}, end=${currentPeriodEnd}`);
+          }
 
           // Create subscription record
           const { data: newSubscription, error } = await supabaseAdmin
@@ -109,7 +121,7 @@ export async function POST(req: NextRequest) {
               stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
               plan_type: planType,
-              stripe_price_id: priceId,
+              stripe_price_id: priceId || null,
               status: subscriptionStatus,
               current_period_start: new Date(currentPeriodStart * 1000).toISOString(),
               current_period_end: new Date(currentPeriodEnd * 1000).toISOString(),

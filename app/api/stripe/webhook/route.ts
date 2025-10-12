@@ -68,8 +68,11 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
+        console.log('Processing checkout.session.completed:', session.id);
 
         if (session.mode === 'subscription' && session.subscription) {
+          console.log('Retrieving subscription:', session.subscription);
+
           const stripeSubscription = await stripe.subscriptions.retrieve(
             session.subscription as string
           ) as Stripe.Subscription;
@@ -77,9 +80,12 @@ export async function POST(req: NextRequest) {
           const clinicId = session.metadata?.clinic_id;
           const planType = session.metadata?.plan_type;
 
+          console.log('Metadata:', { clinicId, planType });
+
           if (!clinicId || !planType) {
-            console.error('Missing metadata in checkout session');
-            break;
+            const error = 'Missing metadata in checkout session';
+            console.error(error);
+            throw new Error(error);
           }
 
           // Extract subscription data for insert (using explicit property access)
@@ -92,6 +98,8 @@ export async function POST(req: NextRequest) {
           const customerId = sub.customer as string;
           const subscriptionId = sub.id;
           const priceId = sub.items.data[0].price.id;
+
+          console.log('Creating subscription record:', { clinicId, subscriptionId, customerId });
 
           // Create subscription record
           const { data: newSubscription, error } = await supabaseAdmin
@@ -112,8 +120,10 @@ export async function POST(req: NextRequest) {
 
           if (error) {
             console.error('Error creating subscription:', error);
-            break;
+            throw new Error(`Failed to create subscription: ${error.message}`);
           }
+
+          console.log('Subscription created successfully:', newSubscription.id);
 
           // Log to history
           await logSubscriptionHistory(
@@ -126,6 +136,8 @@ export async function POST(req: NextRequest) {
             'checkout_completed',
             event.id
           );
+
+          console.log('Subscription history logged');
         }
         break;
       }

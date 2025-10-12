@@ -68,11 +68,8 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log('Processing checkout.session.completed:', session.id);
 
         if (session.mode === 'subscription' && session.subscription) {
-          console.log('Retrieving subscription:', session.subscription);
-
           const stripeSubscription = await stripe.subscriptions.retrieve(
             session.subscription as string
           ) as Stripe.Subscription;
@@ -80,49 +77,26 @@ export async function POST(req: NextRequest) {
           const clinicId = session.metadata?.clinic_id;
           const planType = session.metadata?.plan_type;
 
-          console.log('Metadata:', { clinicId, planType });
-
           if (!clinicId || !planType) {
-            const error = 'Missing metadata in checkout session';
-            console.error(error);
-            throw new Error(error);
+            console.error('Missing metadata in checkout session');
+            throw new Error('Missing metadata in checkout session');
           }
 
-          // Extract subscription data safely (using explicit any for Stripe API access)
+          // Extract subscription data (using explicit any for Stripe API access)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const sub = stripeSubscription as any;
-
-          // Debug: Log all subscription properties
-          console.log('Full subscription object keys:', Object.keys(sub));
-          console.log('Subscription properties:', {
-            current_period_start: sub.current_period_start,
-            current_period_end: sub.current_period_end,
-            currentPeriodStart: sub.currentPeriodStart,
-            currentPeriodEnd: sub.currentPeriodEnd,
-            billing_cycle_anchor: sub.billing_cycle_anchor,
-            start_date: sub.start_date,
-          });
 
           const customerId = typeof sub.customer === 'string'
             ? sub.customer
             : sub.customer?.id;
           const subscriptionId = sub.id;
           const subscriptionStatus = sub.status;
-          const cancelAtPeriodEnd = sub.cancel_at_period_end || sub.cancelAtPeriodEnd;
+          const cancelAtPeriodEnd = sub.cancel_at_period_end;
 
           // In API v2025-07-30, period dates moved to subscription item level
           const currentPeriodStart = sub.items?.data?.[0]?.current_period_start;
           const currentPeriodEnd = sub.items?.data?.[0]?.current_period_end;
           const priceId = sub.items?.data?.[0]?.price?.id;
-
-          console.log('Extracted subscription data:', {
-            clinicId,
-            subscriptionId,
-            customerId,
-            currentPeriodStart,
-            currentPeriodEnd,
-            priceId
-          });
 
           // Validate required fields
           if (!currentPeriodStart || !currentPeriodEnd) {

@@ -25,9 +25,7 @@ import {
   Building2,
   Settings,
   CreditCard,
-  Bell,
   Package,
-  TrendingUp,
   Crown,
   Euro,
 } from "lucide-react";
@@ -363,36 +361,6 @@ export default function AccountPage() {
         {/* Configurações Tab */}
         <TabsContent value="configuracoes">
           <div className="grid gap-6">
-            {/* Notifications Card */}
-            <Card className="border-2 border-teal-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <CardHeader className="bg-gradient-to-r from-violet-50/50 to-purple-50/50 rounded-t-2xl">
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-violet-600" />
-                  Notificações
-                </CardTitle>
-                <CardDescription>
-                  Preferências de notificações
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                  <Label htmlFor="email-notifications" className="cursor-pointer">
-                    Notificações por email
-                  </Label>
-                  <Button variant="outline" size="sm">
-                    Configurar
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                  <Label htmlFor="voucher-alerts" className="cursor-pointer">
-                    Alertas de cheques
-                  </Label>
-                  <Button variant="outline" size="sm">
-                    Configurar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Business Settings Card */}
             <Card className="border-2 border-teal-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
@@ -512,34 +480,6 @@ export default function AccountPage() {
               </CardContent>
             </Card>
 
-            {/* Usage Statistics Card */}
-            <Card className="border-2 border-teal-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
-              <CardHeader className="bg-gradient-to-r from-emerald-50/50 to-green-50/50 rounded-t-2xl">
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-emerald-600" />
-                  Estatísticas de Utilização
-                </CardTitle>
-                <CardDescription>
-                  Resumo da utilização este mês
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 pt-6">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl text-center">
-                    <p className="text-2xl font-bold text-teal-700">0</p>
-                    <p className="text-sm text-gray-600">Cheques processados</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl text-center">
-                    <p className="text-2xl font-bold text-emerald-700">0</p>
-                    <p className="text-sm text-gray-600">Pacientes ativos</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl text-center">
-                    <p className="text-2xl font-bold text-violet-700">0</p>
-                    <p className="text-sm text-gray-600">Médicos registados</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
       </Tabs>

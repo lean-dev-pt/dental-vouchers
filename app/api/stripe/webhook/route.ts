@@ -91,17 +91,31 @@ export async function POST(req: NextRequest) {
           // Extract subscription data safely (using explicit any for Stripe API access)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const sub = stripeSubscription as any;
+
+          // Debug: Log all subscription properties
+          console.log('Full subscription object keys:', Object.keys(sub));
+          console.log('Subscription properties:', {
+            current_period_start: sub.current_period_start,
+            current_period_end: sub.current_period_end,
+            currentPeriodStart: sub.currentPeriodStart,
+            currentPeriodEnd: sub.currentPeriodEnd,
+            billing_cycle_anchor: sub.billing_cycle_anchor,
+            start_date: sub.start_date,
+          });
+
           const customerId = typeof sub.customer === 'string'
             ? sub.customer
             : sub.customer?.id;
           const subscriptionId = sub.id;
           const subscriptionStatus = sub.status;
-          const cancelAtPeriodEnd = sub.cancel_at_period_end;
-          const currentPeriodStart = sub.current_period_start;
-          const currentPeriodEnd = sub.current_period_end;
+          const cancelAtPeriodEnd = sub.cancel_at_period_end || sub.cancelAtPeriodEnd;
+
+          // Try different possible property names for period dates
+          const currentPeriodStart = sub.current_period_start || sub.currentPeriodStart || sub.start_date || sub.billing_cycle_anchor;
+          const currentPeriodEnd = sub.current_period_end || sub.currentPeriodEnd;
           const priceId = sub.items?.data?.[0]?.price?.id;
 
-          console.log('Subscription data:', {
+          console.log('Extracted subscription data:', {
             clinicId,
             subscriptionId,
             customerId,

@@ -4,8 +4,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import { Mail, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 function CheckEmailContent() {
@@ -101,25 +100,13 @@ function CheckEmailContent() {
             </div>
           )}
 
-          <div className="space-y-3">
-            <Button
-              onClick={handleResendEmail}
-              disabled={isResending || !email}
-              className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-            >
-              {isResending ? "A enviar..." : "Reenviar Email"}
-            </Button>
-
-            <Link href="/auth/login" className="block">
-              <Button
-                variant="outline"
-                className="w-full border-2 border-teal-300 text-teal-700 hover:bg-teal-50 font-semibold py-6 rounded-xl"
-              >
-                <ArrowLeft className="mr-2 h-5 w-5" />
-                Voltar ao Login
-              </Button>
-            </Link>
-          </div>
+          <Button
+            onClick={handleResendEmail}
+            disabled={isResending || !email}
+            className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+          >
+            {isResending ? "A enviar..." : "Reenviar Email"}
+          </Button>
         </CardContent>
       </Card>
     </div>

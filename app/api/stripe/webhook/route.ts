@@ -115,6 +115,18 @@ export async function POST(req: NextRequest) {
             throw new Error(`Missing period dates: start=${currentPeriodStart}, end=${currentPeriodEnd}`);
           }
 
+          // Check if subscription already exists
+          const { data: existingSub } = await supabaseAdmin
+            .from('subscriptions')
+            .select('id')
+            .eq('stripe_subscription_id', subscriptionId)
+            .single();
+
+          if (existingSub) {
+            console.log('Subscription already exists, skipping creation:', subscriptionId);
+            break;
+          }
+
           // Create subscription record
           const { data: newSubscription, error } = await supabaseAdmin
             .from('subscriptions')
@@ -134,24 +146,29 @@ export async function POST(req: NextRequest) {
 
           if (error) {
             console.error('Error creating subscription:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
             throw new Error(`Failed to create subscription: ${error.message}`);
           }
 
           console.log('Subscription created successfully:', newSubscription.id);
 
           // Log to history
-          await logSubscriptionHistory(
-            newSubscription.id,
-            clinicId,
-            null,
-            stripeSubscription.status,
-            null,
-            planType,
-            'checkout_completed',
-            event.id
-          );
-
-          console.log('Subscription history logged');
+          try {
+            await logSubscriptionHistory(
+              newSubscription.id,
+              clinicId,
+              null,
+              stripeSubscription.status,
+              null,
+              planType,
+              'checkout_completed',
+              event.id
+            );
+            console.log('Subscription history logged');
+          } catch (historyError) {
+            console.error('Failed to log subscription history:', historyError);
+            // Don't throw - subscription was created successfully
+          }
         }
         break;
       }

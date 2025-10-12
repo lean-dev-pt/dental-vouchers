@@ -1,8 +1,66 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.09** - Fixed Signup Flow with Email Confirmation
+**Version: 1.10** - Refactored Signup with Email Confirmation
 
 ## 📝 Version History
+
+### Version 1.10 - Refactored Signup with Email Confirmation
+**Release Date**: October 12, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Fixed 400 "Email not confirmed" error blocking signup flow
+- Removed auto-login attempt that was causing profile/clinic creation failure
+- Implemented proper Supabase email verification before account access
+- Created seamless multi-stage signup flow: confirmation → onboarding → checkout → dashboard
+
+**Files Created:**
+- [app/auth/callback/route.ts](app/auth/callback/route.ts) - Email confirmation callback handler that exchanges code for session
+- [app/auth/check-email/page.tsx](app/auth/check-email/page.tsx) - Beautiful waiting page with resend email functionality
+- [app/onboarding/page.tsx](app/onboarding/page.tsx) - Post-confirmation page that creates clinic/profile and initiates Stripe checkout
+- [public/youtube-thumbnail.html](public/youtube-thumbnail.html) - Custom branded video thumbnail with teal/cyan gradient design
+
+**Files Modified:**
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:61-98) - Simplified to store clinic data in user metadata, redirect to check-email page (removed auto-login and immediate onboarding)
+- [lib/supabase/middleware.ts](lib/supabase/middleware.ts:50-65) - Added `/auth/callback`, `/auth/check-email`, `/onboarding` to public routes
+
+**New Signup Flow:**
+1. User fills signup form → data stored in user metadata
+2. Supabase sends confirmation email
+3. User redirected to check-email page (with resend option)
+4. User clicks email link → /auth/callback exchanges code for session
+5. Callback redirects to /onboarding with plan parameter
+6. Onboarding creates clinic/profile via API → redirects to Stripe
+7. Payment complete → user accesses dashboard
+
+**Features Added:**
+- **Email Confirmation Required**: Follows Supabase default security model
+- **Beautiful Check-Email Page**: Portuguese UI with gradient design, resend functionality, clear instructions
+- **Automated Onboarding**: Post-confirmation page automatically creates clinic/profile and initiates checkout
+- **Error Handling**: Graceful handling of expired links, missing codes, and API failures
+- **User Metadata Storage**: Clinic info (name, owner, phone, DPA consent, plan) stored in auth.users.user_metadata
+- **Custom Video Thumbnail**: HTML-based thumbnail matching app's teal/cyan gradient design
+
+**Technical Details:**
+- User metadata structure: `{ clinicName, ownerName, phone, dpaConsent, plan }`
+- Onboarding API unchanged (still uses service role key to bypass RLS)
+- Middleware allows unauthenticated access to callback and onboarding routes
+- Callback route uses `exchangeCodeForSession()` to create authenticated session
+- Check-email page uses `supabase.auth.resend()` for email re-sending
+
+**Security Improvements:**
+- Email ownership verified before any account access
+- No auto-login vulnerability (email must be confirmed first)
+- Stripe payment still primary bot defense mechanism
+- Service role key only used after email confirmation
+
+**Performance Improvements:**
+- Build successful with 32 routes (3 new routes added)
+- 0 build errors, 2 pre-existing ESLint warnings (unrelated)
+- Cleaner separation of concerns (auth → onboarding → payment)
+- Better error recovery with user-friendly messages
+
+---
 
 ### Version 1.09 - Fixed Signup Flow with Email Confirmation
 **Release Date**: October 11, 2025

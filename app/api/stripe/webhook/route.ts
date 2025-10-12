@@ -88,16 +88,18 @@ export async function POST(req: NextRequest) {
             throw new Error(error);
           }
 
-          // Extract subscription data safely
-          const customerId = typeof stripeSubscription.customer === 'string'
-            ? stripeSubscription.customer
-            : stripeSubscription.customer.id;
-          const subscriptionId = stripeSubscription.id;
-          const subscriptionStatus = stripeSubscription.status;
-          const cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
-          const currentPeriodStart = stripeSubscription.current_period_start;
-          const currentPeriodEnd = stripeSubscription.current_period_end;
-          const priceId = stripeSubscription.items.data[0]?.price?.id;
+          // Extract subscription data safely (using explicit any for Stripe API access)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sub = stripeSubscription as any;
+          const customerId = typeof sub.customer === 'string'
+            ? sub.customer
+            : sub.customer?.id;
+          const subscriptionId = sub.id;
+          const subscriptionStatus = sub.status;
+          const cancelAtPeriodEnd = sub.cancel_at_period_end;
+          const currentPeriodStart = sub.current_period_start;
+          const currentPeriodEnd = sub.current_period_end;
+          const priceId = sub.items?.data?.[0]?.price?.id;
 
           console.log('Subscription data:', {
             clinicId,

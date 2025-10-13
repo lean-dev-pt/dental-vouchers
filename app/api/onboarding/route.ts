@@ -65,7 +65,6 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (clinicError || !clinic) {
-      console.error('Error creating clinic:', clinicError);
       return NextResponse.json(
         { error: 'Failed to create clinic' },
         { status: 500 }
@@ -85,7 +84,6 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (profileError || !profile) {
-      console.error('Error creating profile:', profileError);
       // Rollback: delete clinic if profile creation fails
       await supabaseAdmin.from('clinics').delete().eq('id', clinic.id);
       return NextResponse.json(
@@ -106,8 +104,7 @@ export async function POST(req: NextRequest) {
         role: profile.role,
       },
     });
-  } catch (error) {
-    console.error('Onboarding error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

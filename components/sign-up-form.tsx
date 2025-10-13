@@ -60,7 +60,6 @@ export function SignUpForm({
 
     try {
       // Sign up the user with clinic info in metadata
-      console.log("Attempting signup with email:", email);
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -76,23 +75,16 @@ export function SignUpForm({
         },
       });
 
-      console.log("Signup response:", { authData, authError });
-
       if (authError) {
-        console.error("Signup error:", authError);
         throw authError;
       }
       if (!authData.user) {
-        console.error("No user in signup response");
         throw new Error("Falha ao criar utilizador");
       }
-
-      console.log("User created successfully:", authData.user.id);
 
       // Redirect to check-email page
       window.location.href = `/auth/check-email?email=${encodeURIComponent(email)}`;
     } catch (error: unknown) {
-      console.error("Signup error:", error);
       setError(error instanceof Error ? error.message : "Ocorreu um erro");
       setIsLoading(false);
     }

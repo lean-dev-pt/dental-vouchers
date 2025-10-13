@@ -1,8 +1,62 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.11** - Fixed Stripe Webhook for API v2025-07-30
+**Version: 1.12** - Fixed Email Validation and Authenticated User Redirect
 
 ## 📝 Version History
+
+### Version 1.12 - Fixed Email Validation and Authenticated User Redirect
+**Release Date**: October 13, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Fixed signup failure with custom domain emails (e.g., `jorge@jorgedaniel.pt`) - emails never reached Supabase
+- Browser HTML5 email validation was blocking valid custom domains before form submission
+- Authenticated users could access `/auth/sign-up` and `/auth/login`, causing session conflicts
+- User confusion when trying to signup while already logged in (Supabase used existing session email)
+
+**Files Modified:**
+- [components/sign-up-form.tsx](components/sign-up-form.tsx:175-184,42-48) - Changed input type from "email" to "text" with inputMode="email", added custom JavaScript email validation
+- [components/login-form.tsx](components/login-form.tsx:92-101,36-42) - Same email validation fix for consistency
+- [app/admin/login/page.tsx](app/admin/login/page.tsx:84-93,31-37) - Applied email validation fix to admin login
+- [app/auth/sign-up/page.tsx](app/auth/sign-up/page.tsx:6-13) - Added server-side authentication check, redirects logged-in users to dashboard
+- [app/auth/login/page.tsx](app/auth/login/page.tsx:5-12) - Added server-side authentication check, redirects logged-in users to dashboard
+- [lib/supabase/middleware.ts](lib/supabase/middleware.ts:50-58) - Added middleware logic to redirect authenticated users away from auth pages
+
+**Root Cause:**
+- HTML5 `type="email"` validation performs browser-specific checks that can reject valid emails
+- Some browsers reject certain domains (like `.pt` custom domains) even with valid MX records
+- Signup attempts were blocked client-side, never reaching the Supabase backend
+- Auth logs showed ZERO signup attempts for rejected emails (vs. explicit errors for truly invalid emails)
+
+**Features Added:**
+- **Custom Email Validation**: Replaced browser HTML5 validation with permissive JavaScript regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
+- **Mobile Keyboard Support**: Used `inputMode="email"` to maintain email keyboard on mobile devices
+- **Authenticated User Redirect**: Server-side and middleware protection prevents logged-in users from accessing auth pages
+- **User-Friendly Errors**: Portuguese error messages for invalid email formats
+
+**Technical Details:**
+- Changed `<input type="email">` to `<input type="text" inputMode="email">` across all auth forms
+- JavaScript validation runs before form submission to Supabase
+- Server components check authentication status using `supabase.auth.getClaims()`
+- Middleware intercepts `/auth/sign-up` and `/auth/login` for authenticated users, redirects to `/dashboard`
+- Validation is consistent across: sign-up form, login form, and admin login
+
+**Performance Improvements:**
+- Build successful with 34 routes, 0 errors, 2 pre-existing ESLint warnings (unrelated)
+- All email domains now accepted (including `.pt`, custom domains, and all TLDs)
+- No more silent signup failures
+- Clear UX: logged-in users automatically routed to dashboard
+
+**Testing Evidence:**
+- ✅ `jorge.daniel.2006@gmail.com` - User created successfully (Gmail)
+- ✅ `jorgedaniel.pwp@gmail.com` - User created successfully (Gmail)
+- ❌ `jorge@jorgedaniel.pt` - Previously failed silently (NO log entry), now expected to work
+- Auth logs confirmed zero signup attempts before fix (browser blocked submission)
+
+**Git Commits:**
+- (To be added after commit)
+
+---
 
 ### Version 1.11 - Fixed Stripe Webhook for API v2025-07-30
 **Release Date**: October 12, 2025

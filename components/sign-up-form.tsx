@@ -39,6 +39,14 @@ export function SignUpForm({
     setIsLoading(true);
     setError(null);
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError("Por favor introduza um endereço de email válido");
+      setIsLoading(false);
+      return;
+    }
+
     // Validation
     if (password !== repeatPassword) {
       setError("As palavras-passe não coincidem");
@@ -174,7 +182,8 @@ export function SignUpForm({
                   <Label htmlFor="email" className="font-semibold">Email <span className="text-red-500">*</span></Label>
                   <Input
                     id="email"
-                    type="email"
+                    type="text"
+                    inputMode="email"
                     placeholder="exemplo@clinica.pt"
                     required
                     value={email}

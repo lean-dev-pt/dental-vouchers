@@ -47,6 +47,16 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
+  // Redirect authenticated users away from auth pages
+  if (user && (
+    request.nextUrl.pathname === "/auth/sign-up" ||
+    request.nextUrl.pathname === "/auth/login"
+  )) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
   // Public routes that don't require authentication
   const publicRoutes = [
     "/",

@@ -33,6 +33,14 @@ export function LoginForm({
     setIsLoading(true);
     setError(null);
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError("Por favor introduza um endereço de email válido");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -91,7 +99,8 @@ export function LoginForm({
                 <Label htmlFor="email" className="font-semibold">Email</Label>
                 <Input
                   id="email"
-                  type="email"
+                  type="text"
+                  inputMode="email"
                   placeholder="exemplo@clinica.pt"
                   required
                   value={email}

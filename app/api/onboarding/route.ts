@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { OnboardingSchema, validateInput } from '@/lib/validations/api-schemas';
+import { logger } from '@/lib/logger';
 
 // Create admin Supabase client with service role key (bypasses RLS and auth checks)
 const supabaseAdmin = createClient(
@@ -15,29 +17,19 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, email, clinicName, ownerName, dpaConsent } = await req.json();
+    // Parse and validate request body
+    const body = await req.json();
+    const validation = validateInput(OnboardingSchema, body);
 
-    // Validate required fields
-    if (!userId || !email) {
+    if (!validation.success) {
+      logger.warn('Onboarding validation failed', { error: validation.error });
       return NextResponse.json(
-        { error: 'User ID and email are required' },
+        { error: validation.error },
         { status: 400 }
       );
     }
 
-    if (!clinicName || clinicName.trim() === '') {
-      return NextResponse.json(
-        { error: 'Clinic name is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!dpaConsent) {
-      return NextResponse.json(
-        { error: 'DPA consent is required' },
-        { status: 400 }
-      );
-    }
+    const { userId, email, clinicName, ownerName, dpaConsent } = validation.data;
 
     // Check if user already has a profile/clinic
     const { data: existingProfile } = await supabaseAdmin
@@ -47,6 +39,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (existingProfile) {
+      logger.info('Profile already exists for onboarding', { userId });
       return NextResponse.json(
         { error: 'Profile already exists' },
         { status: 400 }
@@ -57,7 +50,7 @@ export async function POST(req: NextRequest) {
     const { data: clinic, error: clinicError } = await supabaseAdmin
       .from('clinics')
       .insert({
-        name: clinicName.trim(),
+        name: clinicName,
         data_processing_consent: dpaConsent,
         data_processing_consent_date: new Date().toISOString(),
       })
@@ -65,7 +58,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (clinicError || !clinic) {
-      console.error('Error creating clinic:', clinicError);
+      logger.error('Failed to create clinic', clinicError, {
+        userId,
+        clinicName
+      });
       return NextResponse.json(
         { error: 'Failed to create clinic' },
         { status: 500 }
@@ -79,13 +75,16 @@ export async function POST(req: NextRequest) {
         user_id: userId,
         clinic_id: clinic.id,
         role: 'admin', // First user is always admin
-        name: ownerName?.trim() || email?.split('@')[0] || 'Admin',
+        name: ownerName || email?.split('@')[0] || 'Admin',
       })
       .select()
       .single();
 
     if (profileError || !profile) {
-      console.error('Error creating profile:', profileError);
+      logger.error('Failed to create profile', profileError, {
+        userId,
+        clinicId: clinic.id
+      });
       // Rollback: delete clinic if profile creation fails
       await supabaseAdmin.from('clinics').delete().eq('id', clinic.id);
       return NextResponse.json(
@@ -93,6 +92,12 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    logger.info('Onboarding completed successfully', {
+      userId,
+      clinicId: clinic.id,
+      profileId: profile.id
+    });
 
     return NextResponse.json({
       success: true,
@@ -107,9 +112,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Onboarding error:', error);
+    logger.error('Onboarding error', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to complete onboarding' },
       { status: 500 }
     );
   }

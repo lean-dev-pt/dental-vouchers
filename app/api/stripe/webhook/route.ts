@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { logger } from '@/lib/logger';
 
 // Create admin Supabase client for webhook operations (bypasses RLS)
 const supabaseAdmin = createClient(
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+    logger.error('Webhook signature verification failed', err);
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
           const planType = session.metadata?.plan_type;
 
           if (!clinicId || !planType) {
-            console.error('Missing metadata in checkout session');
+            logger.error('Missing metadata in checkout session', null, { sessionId: session.id, metadata: session.metadata });
             throw new Error('Missing metadata in checkout session');
           }
 
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
             .single();
 
           if (existingSub) {
-            console.log('Subscription already exists, skipping creation:', subscriptionId);
+            logger.info('Subscription already exists, skipping creation', { subscriptionId });
             break;
           }
 
@@ -133,12 +134,12 @@ export async function POST(req: NextRequest) {
             .single();
 
           if (error) {
-            console.error('Error creating subscription:', error);
-            console.error('Error details:', JSON.stringify(error, null, 2));
+            logger.error('Failed to create subscription', error, { clinicId, subscriptionId });
+            
             throw new Error(`Failed to create subscription: ${error.message}`);
           }
 
-          console.log('Subscription created successfully:', newSubscription.id);
+          logger.info('Subscription created successfully', { subscriptionId: newSubscription.id, clinicId, planType });
 
           // Log to history
           try {
@@ -152,9 +153,9 @@ export async function POST(req: NextRequest) {
               'checkout_completed',
               event.id
             );
-            console.log('Subscription history logged');
+            logger.info('Subscription history logged', { subscriptionId: newSubscription.id });
           } catch (historyError) {
-            console.error('Failed to log subscription history:', historyError);
+            logger.error('Failed to log subscription history', historyError);
             // Don't throw - subscription was created successfully
           }
         }
@@ -168,7 +169,7 @@ export async function POST(req: NextRequest) {
         const clinicId = sub.metadata?.clinic_id;
 
         if (!clinicId) {
-          console.error('Missing clinic_id in subscription metadata');
+          logger.warn('Missing clinic_id in subscription metadata', { subscriptionId: sub.id });
           break;
         }
 
@@ -194,7 +195,7 @@ export async function POST(req: NextRequest) {
           .eq('stripe_subscription_id', sub.id);
 
         if (error) {
-          console.error('Error updating subscription:', error);
+          logger.error('Failed to update subscription', error, { subscriptionId: sub.id, clinicId });
           break;
         }
 
@@ -221,7 +222,7 @@ export async function POST(req: NextRequest) {
         const clinicId = sub.metadata?.clinic_id;
 
         if (!clinicId) {
-          console.error('Missing clinic_id in subscription metadata');
+          logger.warn('Missing clinic_id in subscription metadata', { subscriptionId: sub.id });
           break;
         }
 
@@ -242,7 +243,7 @@ export async function POST(req: NextRequest) {
           .eq('stripe_subscription_id', sub.id);
 
         if (error) {
-          console.error('Error canceling subscription:', error);
+          logger.error('Failed to cancel subscription', error, { subscriptionId: sub.id, clinicId });
           break;
         }
 
@@ -276,7 +277,7 @@ export async function POST(req: NextRequest) {
           const clinicId = sub.metadata?.clinic_id;
 
           if (!clinicId) {
-            console.error('Missing clinic_id in subscription metadata');
+            logger.warn('Missing clinic_id in subscription metadata', { subscriptionId: sub.id });
             break;
           }
 
@@ -296,7 +297,7 @@ export async function POST(req: NextRequest) {
             .eq('stripe_subscription_id', sub.id);
 
           if (error) {
-            console.error('Error updating subscription to past_due:', error);
+            logger.error('Failed to update subscription to past_due', error, { subscriptionId: sub.id, clinicId });
             break;
           }
 
@@ -318,12 +319,12 @@ export async function POST(req: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.info('Unhandled webhook event type', { eventType: event.type });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook handler error:', error);
+    logger.error('Webhook handler error', error, { eventType: event.type, eventId: event.id });
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,6 +10,7 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      logger.warn('Unauthorized portal access attempt', { error: authError?.message });
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -23,6 +25,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (profileError || !profile) {
+      logger.warn('Profile not found for portal access', {
+        userId: user.id,
+        error: profileError?.message
+      });
       return NextResponse.json(
         { error: 'Profile not found' },
         { status: 404 }
@@ -37,6 +43,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (subscriptionError || !subscription) {
+      logger.warn('No subscription found for portal access', {
+        clinicId: profile.clinic_id,
+        error: subscriptionError?.message
+      });
       return NextResponse.json(
         { error: 'No subscription found' },
         { status: 404 }
@@ -49,11 +59,16 @@ export async function POST(req: NextRequest) {
       return_url: `${req.nextUrl.origin}/dashboard/account`,
     });
 
+    logger.info('Portal session created', {
+      clinicId: profile.clinic_id,
+      customerId: subscription.stripe_customer_id,
+    });
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error('Portal error:', error);
+    logger.error('Portal error', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to create portal session' },
       { status: 500 }
     );
   }

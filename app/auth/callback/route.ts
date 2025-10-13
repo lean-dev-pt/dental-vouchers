@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
 
   // Handle error from Supabase (e.g., expired link)
   if (error) {
-    console.error('Email confirmation error:', error, errorDescription);
     return NextResponse.redirect(
       `${requestUrl.origin}/auth/sign-up?error=${encodeURIComponent(errorDescription || error)}`
     );
@@ -28,7 +27,6 @@ export async function GET(request: NextRequest) {
   const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
   if (exchangeError || !data.user) {
-    console.error('Error exchanging code for session:', exchangeError);
     return NextResponse.redirect(
       `${requestUrl.origin}/auth/sign-up?error=confirmation_failed`
     );

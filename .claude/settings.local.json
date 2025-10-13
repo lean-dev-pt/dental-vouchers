@@ -1,37 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "mcp__supabase__apply_migration",
-      "mcp__supabase__generate_typescript_types",
-      "Bash(npm run build:*)",
-      "Bash(npm run lint)",
-      "mcp__supabase__list_tables",
-      "mcp__shadcn__search_items_in_registries",
-      "mcp__shadcn__get_add_command_for_items",
-      "Bash(npx:*)",
-      "mcp__supabase__execute_sql",
-      "Bash(npm run dev:*)",
-      "mcp__shadcn__get_item_examples_from_registries",
-      "Bash(npm install:*)",
-      "WebSearch",
-      "Bash(rm:*)",
-      "mcp__supabase__list_migrations",
-      "Bash(node -e \"const fs = require(''fs''); const content = fs.readFileSync(''C:/Users/Jorge/coding/apps/dental-vouchers/app/dashboard/reports/page.tsx'', ''utf8''); let open = 0, close = 0; for(let c of content) { if(c === ''{'') open++; if(c === ''}'') close++; } console.log(''Open braces:'', open, ''Close braces:'', close, ''Difference:'', open - close);\")",
-      "Bash(cat:*)",
-      "Bash(git init:*)",
-      "Bash(git branch:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(gh auth:*)",
-      "Bash(git config:*)",
-      "Bash(gh repo create:*)",
-      "Bash(git checkout:*)",
-      "Bash(git push:*)",
-      "Bash(git merge:*)",
-      "Bash(git pull:*)",
-      "Bash(git stash:*)",
-      "Bash(vercel logs:*)"
-    ]
+      "Bash(node -e \"const fs = require(''fs''); const file = ''C:/Users/Jorge/coding/apps/dental-vouchers/lib/rate-limit.ts''; let content = fs.readFileSync(file, ''utf8''); content = content.replace(/req\\.ip \\|\\|[\\r\\n\\s]+/g, ''''); fs.writeFileSync(file, content);\")",
+      "Bash(node -e \"const fs = require(''fs''); const file = ''C:/Users/Jorge/coding/apps/dental-vouchers/lib/validations/api-schemas.ts''; let content = fs.readFileSync(file, ''utf8''); content = content.replace(/errorMap: \\(\\) => \\(\\{ message: ''Plan type must be either monthly or annual'' \\}\\),/g, \"\"message: ''Plan type must be either monthly or annual'',\"\"); fs.writeFileSync(file, content);\")",
+      "Bash(node -e \"const fs = require(''fs''); const file = ''C:/Users/Jorge/coding/apps/dental-vouchers/lib/validations/api-schemas.ts''; let content = fs.readFileSync(file, ''utf8''); content = content.replace(''error.errors.map'', ''error.issues.map''); fs.writeFileSync(file, content);\")",
+      "Bash(node -e \"\nconst fs = require(''fs'');\nconst file = ''C:/Users/Jorge/coding/apps/dental-vouchers/CLAUDE.md'';\nconst content = fs.readFileSync(file, ''utf8'');\nconst versionDoc = fs.readFileSync(''/tmp/version_1.12.txt'', ''utf8'');\nconst updated = content.replace(\n  ''## 📝 Version History'',\n  ''## 📝 Version History'' + versionDoc\n);\nfs.writeFileSync(file, updated);\nconsole.log(''Version 1.12 documentation added to CLAUDE.md'');\n\")"
+    ],
+    "deny": [],
+    "ask": []
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [

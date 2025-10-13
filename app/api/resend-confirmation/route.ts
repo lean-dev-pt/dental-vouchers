@@ -1,15 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { ResendEmailSchema, validateInput } from '@/lib/validations/api-schemas';
+import { logger } from '@/lib/logger';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
+    // Parse and validate request body
+    const body = await req.json();
+    const validation = validateInput(ResendEmailSchema, body);
 
-    if (!email) {
+    if (!validation.success) {
+      logger.warn('Resend email validation failed', { error: validation.error });
       return NextResponse.json(
-        { error: 'Email é obrigatório' },
+        { error: validation.error },
         { status: 400 }
       );
+    }
+
+    const { email } = validation.data;
+
+    // Apply aggressive rate limiting (use email as identifier)
+    const rateLimitResult = await rateLimit(req, 'email', email);
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
     }
 
     const supabase = await createClient();
@@ -24,19 +38,21 @@ export async function POST(req: NextRequest) {
     });
 
     if (error) {
-      console.error('Resend confirmation error:', error);
+      logger.error('Failed to resend confirmation email', error, { email });
       return NextResponse.json(
-        { error: error.message || 'Erro ao reenviar email de confirmação' },
+        { error: 'Erro ao reenviar email de confirmação' },
         { status: 500 }
       );
     }
+
+    logger.info('Confirmation email resent successfully', { email });
 
     return NextResponse.json({
       success: true,
       message: 'Email de confirmação reenviado com sucesso',
     });
   } catch (error) {
-    console.error('Resend confirmation error:', error);
+    logger.error('Resend confirmation error', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

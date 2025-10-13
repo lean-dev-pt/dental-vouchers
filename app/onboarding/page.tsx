@@ -25,7 +25,6 @@ function OnboardingContent() {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
 
         if (userError || !user) {
-          console.error("User not found:", userError);
           setErrorMessage("Utilizador não encontrado. Por favor faça login novamente.");
           setStatus("error");
           setTimeout(() => router.push("/auth/login"), 3000);
@@ -76,7 +75,6 @@ function OnboardingContent() {
         await initiateCheckout(plan);
 
       } catch (error) {
-        console.error("Onboarding error:", error);
         setErrorMessage(error instanceof Error ? error.message : "Ocorreu um erro");
         setStatus("error");
       }
@@ -108,7 +106,6 @@ function OnboardingContent() {
         throw new Error("URL de checkout não encontrado");
       }
     } catch (error) {
-      console.error("Checkout error:", error);
       setErrorMessage(error instanceof Error ? error.message : "Erro ao iniciar pagamento");
       setStatus("error");
     }

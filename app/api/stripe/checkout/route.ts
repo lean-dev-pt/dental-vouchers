@@ -1,23 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/server';
 import { createClient } from '@/lib/supabase/server';
+import { CheckoutSchema, validateInput } from '@/lib/validations/api-schemas';
+import { logger } from '@/lib/logger';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   try {
-    const { planType } = await req.json();
+    // Apply rate limiting
+    const rateLimitResult = await rateLimit(req, 'api');
+    if (!rateLimitResult.success) {
+      return rateLimitResult.response;
+    }
 
-    if (!planType || !['monthly', 'annual'].includes(planType)) {
+    // Parse and validate request body
+    const body = await req.json();
+    const validation = validateInput(CheckoutSchema, body);
+
+    if (!validation.success) {
+      logger.warn('Checkout validation failed', { error: validation.error });
       return NextResponse.json(
-        { error: 'Invalid plan type' },
+        { error: validation.error },
         { status: 400 }
       );
     }
+
+    const { planType } = validation.data;
 
     // Get authenticated user
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      logger.warn('Unauthorized checkout attempt', { error: authError?.message });
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -32,6 +47,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (profileError || !profile || !profile.clinic) {
+      logger.warn('Profile or clinic not found for checkout', {
+        userId: user.id,
+        error: profileError?.message
+      });
       return NextResponse.json(
         { error: 'Profile or clinic not found' },
         { status: 404 }
@@ -47,6 +66,9 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (existingSubscription) {
+      logger.info('Checkout blocked - active subscription exists', {
+        clinicId: profile.clinic_id,
+      });
       return NextResponse.json(
         { error: 'Active subscription already exists' },
         { status: 400 }
@@ -59,8 +81,9 @@ export async function POST(req: NextRequest) {
       : process.env.STRIPE_PRICE_ID_ANNUAL;
 
     if (!priceId) {
+      logger.error('Price ID not configured', null, { planType });
       return NextResponse.json(
-        { error: 'Price ID not configured' },
+        { error: 'Service configuration error' },
         { status: 500 }
       );
     }
@@ -92,11 +115,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    logger.info('Checkout session created', {
+      clinicId: profile.clinic_id,
+      planType,
+      sessionId: session.id,
+    });
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error('Checkout error:', error);
+    logger.error('Checkout error', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to create checkout session' },
       { status: 500 }
     );
   }

@@ -54,7 +54,7 @@
 - Auth logs confirmed zero signup attempts before fix (browser blocked submission)
 
 **Git Commits:**
-- (To be added after commit)
+- 0e634b8: fix: Replace HTML5 email validation with custom JavaScript validation
 
 ---
 

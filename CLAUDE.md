@@ -1,8 +1,88 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.16** - Subscription-Gated Dashboard Access
+**Version: 1.17** - Portuguese Error Message Translations
 
 ## 📝 Version History
+
+### Version 1.17 - Portuguese Error Message Translations
+**Release Date**: October 14, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- All Supabase authentication error messages were displaying in English
+- Generic fallback error messages were in English ("An error occurred")
+- User-facing error messages not localized to Portuguese (pt-PT)
+- Screenshot showed "Invalid login credentials" in English instead of Portuguese
+
+**Files Created:**
+- [lib/error-messages.ts](lib/error-messages.ts) - Comprehensive error translation utility with 40+ mapped error messages
+
+**Files Modified:**
+- [components/login-form.tsx](components/login-form.tsx:5,72) - Imported and used `translateError()` function
+- [components/forgot-password-form.tsx](components/forgot-password-form.tsx:5,42) - Imported and used `translateError()` function
+- [components/update-password-form.tsx](components/update-password-form.tsx:5,40) - Imported and used `translateError()` function
+
+**Error Translations (40+ messages):**
+
+**Authentication Errors:**
+- "Invalid login credentials" → "Credenciais de login inválidas"
+- "Invalid email or password" → "Email ou palavra-passe inválidos"
+- "Email not confirmed" → "Email não confirmado"
+- "User already registered" → "Utilizador já registado"
+- "User not found" → "Utilizador não encontrado"
+- "Password is too weak" → "A palavra-passe é demasiado fraca"
+- "Email link is invalid or has expired" → "O link de email é inválido ou expirou"
+- "Token has expired or is invalid" → "O token expirou ou é inválido"
+
+**Generic Errors:**
+- "An error occurred" → "Ocorreu um erro"
+- "Something went wrong" → "Algo correu mal"
+- "Failed to fetch" → "Falha ao obter dados"
+- "Network error" → "Erro de rede"
+- "Unauthorized" → "Não autorizado"
+- "Session expired" → "Sessão expirada"
+
+**Features Added:**
+- **Automatic Translation**: Error messages automatically converted from English to Portuguese
+- **Smart Matching**: Supports exact match and partial match (case-insensitive) for flexible translation
+- **Fallback Handling**: Returns original message if already in Portuguese or no translation found
+- **Centralized Management**: Single utility file manages all error translations
+- **Developer-Friendly**: Simple `translateError(error)` function call replaces manual error handling
+
+**Technical Details:**
+- Translation utility uses dictionary lookup with 40+ common Supabase errors
+- Supports Error objects, string messages, and unknown types
+- Partial matching allows catching variations of error messages
+- `isPortugueseMessage()` helper detects if message is already localized
+- Zero runtime dependencies, pure TypeScript implementation
+
+**User Experience:**
+- All error messages now display in Portuguese (pt-PT)
+- Consistent language experience across authentication flows
+- Better understanding of errors for Portuguese-speaking users
+- Professional localization matching rest of application
+
+**Performance Improvements:**
+- Build successful with 35 routes, 0 errors, 2 pre-existing ESLint warnings
+- Minimal bundle size impact (~3KB for translation dictionary)
+- Fast dictionary lookup (O(1) for exact match, O(n) for partial match)
+- No external API calls or dependencies
+
+**Testing Scenarios:**
+- Wrong password → "Credenciais de login inválidas"
+- Invalid email format → Already Portuguese validation message
+- Existing email signup → "Utilizador já registado"
+- Expired password reset → "O link de email é inválido ou expirou"
+- Network issues → "Erro de rede"
+
+**Git Commits:**
+- 22e2961: feat: Add comprehensive Portuguese error message translations
+- 7be48b6: revert: Change Stripe checkout locale back to 'auto'
+- 0e5eb5e: fix: Force Portuguese locale 'pt' in Stripe checkout instead of 'auto'
+- 544e249: fix: Change Stripe checkout locale from 'pt' to 'auto' for European Portuguese
+- 745a697: feat: Add subscription-gated dashboard access with locked navigation
+
+---
 
 ### Version 1.16 - Subscription-Gated Dashboard Access
 **Release Date**: October 14, 2025

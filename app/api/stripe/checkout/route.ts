@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       mode: 'subscription',
       payment_method_types: ['card'],
       allow_promotion_codes: true,
-      locale: 'pt', // Force Portuguese (closest to pt-PT, Stripe doesn't support pt-PT specifically)
+      locale: 'auto', // Auto-detect browser locale
       tax_id_collection: {
         enabled: true, // Enable business purchase with VAT/NIF collection
       },

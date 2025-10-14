@@ -30,7 +30,8 @@
       "Bash(git merge:*)",
       "Bash(git pull:*)",
       "Bash(git stash:*)",
-      "Bash(vercel logs:*)"
+      "Bash(vercel logs:*)",
+      "Bash(nslookup:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export default function TestLoginPage() {
   const [email, setEmail] = useState('')
@@ -21,8 +21,9 @@ export default function TestLoginPage() {
     setLogs([]) // Clear previous logs
 
     addLog('=== STARTING SIGNUP TEST ===')
-    addLog(`Email: ${email}`)
-    addLog(`Password length: ${password.length}`)
+    addLog(`Raw email from state: "${email}"`)
+    addLog(`Raw password length: ${password.length}`)
+    addLog(`Email after trim: "${email.trim()}"`)
 
     // Test 1: Basic validation
     addLog('Step 1: Testing email format')
@@ -45,7 +46,7 @@ export default function TestLoginPage() {
     addLog('Step 3: Initializing Supabase client')
     let supabase
     try {
-      supabase = createClientComponentClient()
+      supabase = createClient()
       addLog('Supabase client initialized successfully')
     } catch (error) {
       addLog(`ERROR initializing Supabase: ${error}`)
@@ -53,45 +54,83 @@ export default function TestLoginPage() {
       return
     }
 
-    // Test 4: Attempt signup
-    addLog('Step 4: Calling supabase.auth.signUp()')
+    // Test 3.5: Check for existing session
+    addLog('Step 3.5: Checking for existing session')
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (sessionData.session) {
+        addLog(`WARNING: Existing session found!`)
+        addLog(`Existing session user: ${sessionData.session.user.email}`)
+        addLog(`Existing session ID: ${sessionData.session.user.id}`)
+      } else {
+        addLog('No existing session found (expected for new signup)')
+      }
+    } catch (error) {
+      addLog(`ERROR checking session: ${error}`)
+    }
+
+    // Test 4: Prepare signup payload
+    addLog('Step 4: Preparing signup payload')
+    const signupPayload = {
+      email: email.trim(),
+      password: password,
+    }
+    addLog(`Payload email: "${signupPayload.email}"`)
+    addLog(`Payload password length: ${signupPayload.password.length}`)
+
+    // Test 5: Attempt signup
+    addLog('Step 5: Calling supabase.auth.signUp()')
     addLog(`Timestamp before call: ${new Date().toISOString()}`)
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password: password,
-      })
+      const { data, error } = await supabase.auth.signUp(signupPayload)
 
       addLog(`Timestamp after call: ${new Date().toISOString()}`)
       addLog('Response received from Supabase')
 
-      // Test 5: Analyze response
-      addLog('Step 5: Analyzing response')
+      // Test 6: Analyze response
+      addLog('Step 6: Analyzing response')
+      addLog('=== FULL RESPONSE DATA ===')
+      addLog(JSON.stringify(data, null, 2))
+      addLog('=== END FULL RESPONSE ===')
+
       addLog(`Error: ${error ? JSON.stringify(error, null, 2) : 'null'}`)
       addLog(`Data.user: ${data.user ? 'EXISTS' : 'NULL'}`)
       addLog(`Data.session: ${data.session ? 'EXISTS' : 'NULL'}`)
 
       if (data.user) {
+        addLog('=== USER DETAILS ===')
         addLog(`User ID: ${data.user.id}`)
         addLog(`User email: ${data.user.email}`)
+        addLog(`User created_at: ${data.user.created_at}`)
         addLog(`User confirmed: ${data.user.email_confirmed_at ? 'YES' : 'NO'}`)
-        addLog(`User identities: ${JSON.stringify(data.user.identities?.length || 0)}`)
+        addLog(`User identities count: ${data.user.identities?.length || 0}`)
+        addLog(`User metadata: ${JSON.stringify(data.user.user_metadata || {})}`)
+
+        // CRITICAL: Compare requested vs returned email
+        addLog('=== EMAIL COMPARISON ===')
+        addLog(`Requested email: "${signupPayload.email}"`)
+        addLog(`Returned email: "${data.user.email}"`)
+        addLog(`Emails match: ${signupPayload.email === data.user.email ? 'YES' : 'NO ⚠️ MISMATCH!'}`)
       }
 
       if (error) {
+        addLog('=== ERROR DETAILS ===')
         addLog(`ERROR from Supabase: ${error.message}`)
         addLog(`Error code: ${error.status}`)
         addLog(`Error name: ${error.name}`)
       } else if (!data.user) {
         addLog('WARNING: No error but user is NULL (possible silent failure)')
+      } else if (signupPayload.email !== data.user.email) {
+        addLog('⚠️ CRITICAL: Email mismatch - Supabase returned different user!')
       } else {
         addLog('SUCCESS: User created successfully')
       }
 
-    } catch (error: any) {
-      addLog(`EXCEPTION during signup: ${error.message}`)
-      addLog(`Exception stack: ${error.stack}`)
+    } catch (error) {
+      const err = error as Error
+      addLog(`EXCEPTION during signup: ${err.message}`)
+      addLog(`Exception stack: ${err.stack}`)
     }
 
     addLog('=== SIGNUP TEST COMPLETE ===')
@@ -159,7 +198,7 @@ export default function TestLoginPage() {
 
           <div className="space-y-1 max-h-[600px] overflow-y-auto">
             {logs.length === 0 ? (
-              <p className="text-gray-500">No logs yet. Enter an email and password, then click "Test Signup".</p>
+              <p className="text-gray-500">No logs yet. Enter an email and password, then click &quot;Test Signup&quot;.</p>
             ) : (
               logs.map((log, index) => (
                 <div key={index} className="text-xs leading-relaxed">
@@ -175,7 +214,7 @@ export default function TestLoginPage() {
           <ol className="list-decimal list-inside space-y-1 text-sm text-yellow-900">
             <li>Enter the email: jorge@jorgedaniel.pt</li>
             <li>Enter any password (min 6 chars)</li>
-            <li>Click "Test Signup"</li>
+            <li>Click &quot;Test Signup&quot;</li>
             <li>Watch the logs below to see exactly what happens</li>
             <li>Check browser console (F12) for additional details</li>
           </ol>

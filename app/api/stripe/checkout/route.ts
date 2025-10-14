@@ -70,6 +70,10 @@ export async function POST(req: NextRequest) {
       mode: 'subscription',
       payment_method_types: ['card'],
       allow_promotion_codes: true,
+      locale: 'pt', // Portuguese localization (Stripe uses 'pt' for Portuguese)
+      tax_id_collection: {
+        enabled: true, // Enable business purchase with VAT/NIF collection
+      },
       line_items: [
         {
           price: priceId,

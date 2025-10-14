@@ -13,7 +13,8 @@ import {
   ChevronUp,
   LogOut,
   Activity,
-  HelpCircle
+  HelpCircle,
+  Lock
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -33,35 +34,40 @@ const navItems = [
     href: "/dashboard/vouchers",
     icon: Receipt,
     gradient: "from-teal-500 to-cyan-500",
-    hoverGradient: "hover:from-teal-600 hover:to-cyan-600"
+    hoverGradient: "hover:from-teal-600 hover:to-cyan-600",
+    requiresSubscription: true
   },
   {
     title: "Pacientes",
     href: "/dashboard/patients",
     icon: Users,
     gradient: "from-emerald-500 to-green-500",
-    hoverGradient: "hover:from-emerald-600 hover:to-green-600"
+    hoverGradient: "hover:from-emerald-600 hover:to-green-600",
+    requiresSubscription: true
   },
   {
     title: "Médicos",
     href: "/dashboard/doctors",
     icon: Stethoscope,
     gradient: "from-violet-500 to-purple-500",
-    hoverGradient: "hover:from-violet-600 hover:to-purple-600"
+    hoverGradient: "hover:from-violet-600 hover:to-purple-600",
+    requiresSubscription: true
   },
   {
     title: "Relatórios",
     href: "/dashboard/reports",
     icon: Activity,
     gradient: "from-blue-500 to-indigo-500",
-    hoverGradient: "hover:from-blue-600 hover:to-indigo-600"
+    hoverGradient: "hover:from-blue-600 hover:to-indigo-600",
+    requiresSubscription: true
   },
   {
     title: "Suporte",
     href: "/dashboard/support",
     icon: HelpCircle,
     gradient: "from-pink-500 to-rose-500",
-    hoverGradient: "hover:from-pink-600 hover:to-rose-600"
+    hoverGradient: "hover:from-pink-600 hover:to-rose-600",
+    requiresSubscription: false
   },
 ];
 
@@ -69,6 +75,7 @@ export function SidebarNav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -79,6 +86,25 @@ export function SidebarNav() {
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user?.email) {
         setUserEmail(userData.user.email);
+
+        // Get user's profile to find clinic_id
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("clinic_id")
+          .eq("user_id", userData.user.id)
+          .single();
+
+        if (profile?.clinic_id) {
+          // Check subscription status
+          const { data: subscription } = await supabase
+            .from("subscriptions")
+            .select("status")
+            .eq("clinic_id", profile.clinic_id)
+            .eq("status", "active")
+            .maybeSingle();
+
+          setHasActiveSubscription(!!subscription);
+        }
       }
     };
     getUser();
@@ -132,6 +158,24 @@ export function SidebarNav() {
               const Icon = item.icon;
               const isActive = pathname === item.href ||
                 (item.href === "/dashboard/vouchers" && pathname === "/dashboard");
+              const isLocked = item.requiresSubscription && !hasActiveSubscription;
+
+              // If locked, render as disabled div instead of Link
+              if (isLocked) {
+                return (
+                  <div
+                    key={item.href}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold opacity-50 cursor-not-allowed"
+                    title="Subscrição necessária para aceder"
+                  >
+                    <div className="p-1.5 rounded-lg bg-gray-300">
+                      <Icon className="h-4 w-4 text-gray-500" />
+                    </div>
+                    <span className="font-bold text-gray-500">{item.title}</span>
+                    <Lock className="ml-auto h-4 w-4 text-gray-400" />
+                  </div>
+                );
+              }
 
               return (
                 <Link

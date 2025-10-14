@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Tabs,
   TabsContent,
@@ -55,7 +55,10 @@ interface Subscription {
   canceled_at: string | null;
 }
 
-export default function AccountPage() {
+function AccountPageContent() {
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'geral';
+
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -63,6 +66,7 @@ export default function AccountPage() {
   const [defaultVoucherAmount, setDefaultVoucherAmount] = useState<string>("");
   const [savingAmount, setSavingAmount] = useState(false);
   const [loadingPortal, setLoadingPortal] = useState(false);
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -211,6 +215,31 @@ export default function AccountPage() {
     }
   };
 
+  const handleCheckout = async (planType: 'monthly' | 'annual') => {
+    setLoadingCheckout(true);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planType }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+    } finally {
+      setLoadingCheckout(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -263,7 +292,7 @@ export default function AccountPage() {
       </div>
 
       {/* Tabs Component */}
-      <Tabs defaultValue="geral" className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-1">
           <TabsTrigger
             value="geral"
@@ -466,15 +495,93 @@ export default function AccountPage() {
                     </Button>
                   </>
                 ) : (
-                  <div className="text-center py-8">
-                    <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-gray-700 mb-2">Sem subscrição ativa</h3>
-                    <p className="text-gray-600 mb-6">Subscreva para aceder a todas as funcionalidades</p>
-                    <Link href="/">
-                      <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold px-8 py-3 rounded-xl">
-                        Ver Planos
-                      </Button>
-                    </Link>
+                  <div className="py-8">
+                    <div className="text-center mb-8">
+                      <Package className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+                      <h3 className="text-2xl font-bold text-gray-800 mb-2">Complete a sua subscrição</h3>
+                      <p className="text-gray-600 mb-4">Escolha um plano para aceder a todas as funcionalidades do Cheques Dentista</p>
+                      <div className="inline-block bg-amber-50 border-2 border-amber-200 rounded-xl px-4 py-2">
+                        <p className="text-amber-800 font-semibold">⚠️ Sem subscrição ativa, o acesso ao dashboard está limitado</p>
+                      </div>
+                    </div>
+
+                    {/* Pricing Cards */}
+                    <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                      {/* Monthly Plan */}
+                      <div className="border-2 border-teal-200 rounded-2xl p-6 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                        <div className="text-center mb-6">
+                          <h4 className="text-xl font-bold text-teal-800 mb-2">Plano Mensal</h4>
+                          <div className="flex items-baseline justify-center gap-2 mb-4">
+                            <span className="text-5xl font-extrabold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">€19</span>
+                            <span className="text-gray-600">/mês</span>
+                          </div>
+                        </div>
+                        <div className="space-y-3 mb-6">
+                          <p className="flex items-center gap-2 text-gray-700">
+                            <span className="text-teal-500">✓</span> Gestão ilimitada de cheques
+                          </p>
+                          <p className="flex items-center gap-2 text-gray-700">
+                            <span className="text-teal-500">✓</span> Múltiplos utilizadores
+                          </p>
+                          <p className="flex items-center gap-2 text-gray-700">
+                            <span className="text-teal-500">✓</span> Relatórios avançados
+                          </p>
+                          <p className="flex items-center gap-2 text-gray-700">
+                            <span className="text-teal-500">✓</span> Suporte prioritário
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => handleCheckout('monthly')}
+                          disabled={loadingCheckout}
+                          className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        >
+                          {loadingCheckout ? "A carregar..." : "Começar Agora"}
+                        </Button>
+                      </div>
+
+                      {/* Annual Plan */}
+                      <div className="border-2 border-purple-200 rounded-2xl p-6 bg-gradient-to-br from-purple-50/50 to-pink-50/50 hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative">
+                        <div className="absolute -top-3 right-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                          POUPE 17%
+                        </div>
+                        <div className="text-center mb-6">
+                          <h4 className="text-xl font-bold text-purple-800 mb-2">Plano Anual</h4>
+                          <div className="flex items-baseline justify-center gap-2 mb-1">
+                            <span className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">€190</span>
+                            <span className="text-gray-600">/ano</span>
+                          </div>
+                          <p className="text-sm text-gray-600">Apenas €15,83/mês</p>
+                        </div>
+                        <div className="space-y-3 mb-6">
+                          <p className="flex items-center gap-2 text-gray-700">
+                            <span className="text-purple-500">✓</span> Gestão ilimitada de cheques
+                          </p>
+                          <p className="flex items-center gap-2 text-gray-700">
+                            <span className="text-purple-500">✓</span> Múltiplos utilizadores
+                          </p>
+                          <p className="flex items-center gap-2 text-gray-700">
+                            <span className="text-purple-500">✓</span> Relatórios avançados
+                          </p>
+                          <p className="flex items-center gap-2 text-gray-700">
+                            <span className="text-purple-500">✓</span> Suporte prioritário
+                          </p>
+                          <p className="flex items-center gap-2 text-purple-700 font-semibold">
+                            <span className="text-purple-500">✓</span> Poupe €38/ano
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => handleCheckout('annual')}
+                          disabled={loadingCheckout}
+                          className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        >
+                          {loadingCheckout ? "A carregar..." : "Começar Agora"}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <p className="text-center text-sm text-gray-500 mt-8">
+                      Pagamento seguro processado pela Stripe • Cancele a qualquer momento
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -484,5 +591,17 @@ export default function AccountPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-teal-600">A carregar...</div>
+      </div>
+    }>
+      <AccountPageContent />
+    </Suspense>
   );
 }

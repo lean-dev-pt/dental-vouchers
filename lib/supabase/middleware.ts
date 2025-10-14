@@ -57,6 +57,40 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Check subscription status for dashboard access (except account and support pages)
+  if (user && request.nextUrl.pathname.startsWith("/dashboard")) {
+    const isAccountPage = request.nextUrl.pathname === "/dashboard/account";
+    const isSupportPage = request.nextUrl.pathname.startsWith("/dashboard/support");
+
+    // Allow access to account and support pages without subscription check
+    if (!isAccountPage && !isSupportPage) {
+      // Get user's profile to find clinic_id
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("clinic_id")
+        .eq("user_id", user.sub)
+        .single();
+
+      if (profile?.clinic_id) {
+        // Check if clinic has active subscription
+        const { data: subscription } = await supabase
+          .from("subscriptions")
+          .select("status")
+          .eq("clinic_id", profile.clinic_id)
+          .eq("status", "active")
+          .maybeSingle();
+
+        // No active subscription → redirect to account page (subscription tab)
+        if (!subscription) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/dashboard/account";
+          url.search = "?tab=subscricao";
+          return NextResponse.redirect(url);
+        }
+      }
+    }
+  }
+
   // Public routes that don't require authentication
   const publicRoutes = [
     "/",

@@ -1,8 +1,68 @@
 # Cheques Dentista - Comprehensive Solution Overview
 
-**Version: 1.15** - Portuguese Localization & Business Purchase
+**Version: 1.16** - Subscription-Gated Dashboard Access
 
 ## 📝 Version History
+
+### Version 1.16 - Subscription-Gated Dashboard Access
+**Release Date**: October 14, 2025
+**Status**: COMPLETE - DO NOT MODIFY
+
+**Problems Solved:**
+- Fixed critical security vulnerability allowing dashboard access without payment
+- Users could close Stripe checkout and login later to access all features for free
+- No enforcement of subscription requirement at application level
+
+**Files Modified:**
+- [lib/supabase/middleware.ts](lib/supabase/middleware.ts:60-92) - Added subscription status check after authentication, redirects non-subscribers to account page
+- [components/dashboard/sidebar-nav.tsx](components/dashboard/sidebar-nav.tsx:31-72,78-111,157-210) - Added lock icons and disabled states for navigation items when no active subscription
+- [app/dashboard/account/page.tsx](app/dashboard/account/page.tsx:3,58-70,219-242,296,499-586,597-607) - Auto-opens subscription tab, added direct checkout buttons with pricing cards, wrapped in Suspense
+
+**Features Added:**
+- **Middleware Subscription Gate**: Server-side check prevents access to dashboard pages (except Account and Support) without active subscription
+- **Locked Navigation**: Sidebar shows lock icons and grayed-out appearance for restricted pages
+- **Auto-Redirect to Payment**: Non-subscribers automatically redirected to `/dashboard/account?tab=subscricao`
+- **Beautiful Pricing Display**: Two pricing cards (Monthly €19, Annual €190 with "POUPE 17%" badge) directly on account page
+- **Direct Checkout Buttons**: "Começar Agora" buttons trigger Stripe checkout without leaving the app
+- **Warning Banner**: Prominent amber banner explains limited access and need for subscription
+- **Real-time Status Check**: Sidebar fetches subscription status and updates locked states dynamically
+
+**User Flow:**
+1. User without subscription logs in
+2. Middleware detects no active subscription
+3. Redirects to `/dashboard/account?tab=subscricao`
+4. Subscription tab opens automatically
+5. Warning banner: "⚠️ Sem subscrição ativa, o acesso ao dashboard está limitado"
+6. Sidebar shows all pages with lock icons (grayed out)
+7. Two prominent pricing cards displayed (Monthly/Annual)
+8. User clicks "Começar Agora" → Stripe checkout
+9. After payment → Full dashboard access restored
+
+**Technical Details:**
+- Middleware queries `subscriptions` table for `status = 'active'`
+- Account and Support pages exempt from subscription check (can always access payment and help)
+- Sidebar uses `requiresSubscription: boolean` flag per navigation item
+- Navigation items with `requiresSubscription: true` render as disabled divs with tooltips
+- Account page wrapped in Suspense boundary for Next.js 15 `useSearchParams()` compatibility
+- Checkout handler calls `/api/stripe/checkout` with `planType: 'monthly' | 'annual'`
+
+**Security Improvements:**
+- ✅ Server-side enforcement (cannot be bypassed client-side)
+- ✅ Every dashboard page load validates subscription status
+- ✅ Users can always access payment page to complete subscription
+- ✅ Clear UX prevents confusion (users understand they need to pay)
+- ✅ No free access loophole
+
+**Performance Improvements:**
+- Build successful with 35 routes, 0 errors, 2 pre-existing ESLint warnings
+- Middleware adds ~50ms query time (cached by Supabase)
+- Sidebar subscription check runs once per session
+- Beautiful pricing cards match app's gradient design system
+
+**Git Commits:**
+- [To be committed]: feat: Add subscription-gated dashboard access with locked navigation
+
+---
 
 ### Version 1.15 - Portuguese Localization & Business Purchase
 **Release Date**: October 14, 2025

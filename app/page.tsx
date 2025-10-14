@@ -447,6 +447,7 @@ export default function Home() {
               <Link href="/privacy" className="hover:text-teal-400 transition-colors">Privacidade</Link>
               <Link href="/terms" className="hover:text-teal-400 transition-colors">Termos</Link>
               <a href="mailto:info@lean-consultores.com" className="hover:text-teal-400 transition-colors">Contacto</a>
+              <span className="text-gray-600">v1.13</span>
             </div>
           </div>
         </div>

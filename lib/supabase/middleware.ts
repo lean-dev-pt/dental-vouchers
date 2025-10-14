@@ -66,6 +66,7 @@ export async function updateSession(request: NextRequest) {
     "/auth/callback",
     "/auth/check-email",
     "/onboarding",
+    "/testlogin",
   ];
 
   const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname) ||

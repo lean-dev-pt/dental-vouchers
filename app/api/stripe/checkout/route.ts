@@ -99,6 +99,9 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       allow_promotion_codes: true,
       locale: 'auto', // Auto-detect browser locale
+      automatic_tax: {
+        enabled: true, // Automatically calculate VAT/IVA based on customer location
+      },
       tax_id_collection: {
         enabled: true, // Enable business purchase with VAT/NIF collection
       },

@@ -31,7 +31,11 @@
       "Bash(git pull:*)",
       "Bash(git stash:*)",
       "Bash(vercel logs:*)",
-      "Bash(nslookup:*)"
+      "Bash(nslookup:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git log:*)",
+      "Bash(find:*)",
+      "Bash(head:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

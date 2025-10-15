@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Rate limit: 3 onboarding attempts per user per hour (prevents spam/abuse)
-    const userRateLimit = rateLimit(`onboarding-user:${user.id}`, {
+    const userRateLimit = await rateLimit(`onboarding-user:${user.id}`, {
       interval: 60 * 60 * 1000, // 1 hour
       maxRequests: 3,
     });
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     // Rate limit by IP: 5 attempts per hour
     const ip = getClientIp(req);
-    const ipRateLimit = rateLimit(`onboarding-ip:${ip}`, {
+    const ipRateLimit = await rateLimit(`onboarding-ip:${ip}`, {
       interval: 60 * 60 * 1000, // 1 hour
       maxRequests: 5,
     });

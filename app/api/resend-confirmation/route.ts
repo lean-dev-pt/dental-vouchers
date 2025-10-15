@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Rate limit: 2 requests per email per hour
-    const emailRateLimit = rateLimit(`resend-email:${email}`, {
+    const emailRateLimit = await rateLimit(`resend-email:${email}`, {
       interval: 60 * 60 * 1000, // 1 hour
       maxRequests: 2,
     });
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     // Rate limit by IP: 5 requests per 15 minutes
     const ip = getClientIp(req);
-    const ipRateLimit = rateLimit(`resend-ip:${ip}`, {
+    const ipRateLimit = await rateLimit(`resend-ip:${ip}`, {
       interval: 15 * 60 * 1000, // 15 minutes
       maxRequests: 5,
     });

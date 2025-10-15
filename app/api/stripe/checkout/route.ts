@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/server';
 import { createClient } from '@/lib/supabase/server';
+import { rateLimit, getClientIp } from '@/lib/rate-limiter';
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,6 +22,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    // Rate limit: 20 checkout attempts per user per hour (prevents Stripe API spam)
+    const userRateLimit = await rateLimit(`checkout-user:${user.id}`, {
+      interval: 60 * 60 * 1000, // 1 hour
+      maxRequests: 20,
+    });
+
+    if (!userRateLimit.success) {
+      return NextResponse.json(
+        { error: 'Demasiadas tentativas de checkout. Por favor tente novamente mais tarde.' },
+        { status: 429 }
+      );
+    }
+
+    // Rate limit by IP: 30 attempts per hour (allows multiple users from same office)
+    const ip = getClientIp(req);
+    const ipRateLimit = await rateLimit(`checkout-ip:${ip}`, {
+      interval: 60 * 60 * 1000, // 1 hour
+      maxRequests: 30,
+    });
+
+    if (!ipRateLimit.success) {
+      return NextResponse.json(
+        { error: 'Demasiadas tentativas de checkout deste dispositivo.' },
+        { status: 429 }
       );
     }
 

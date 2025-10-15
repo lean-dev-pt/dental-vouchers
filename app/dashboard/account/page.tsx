@@ -203,13 +203,25 @@ function AccountPageContent() {
 
       const data = await res.json();
 
+      console.log('Portal API response:', { status: res.status, data });
+
+      if (!res.ok) {
+        const errorMessage = data.error || 'Erro desconhecido';
+        alert(`Erro ao abrir portal de subscrição: ${errorMessage}\n\nPor favor contacte o suporte se o problema persistir.`);
+        console.error('Portal API error:', { status: res.status, error: data.error });
+        return;
+      }
+
       if (data.url) {
+        console.log('Redirecting to Stripe Customer Portal:', data.url);
         window.location.href = data.url;
       } else {
-        console.error('Failed to create portal session');
+        alert('Erro: Não foi possível obter o URL do portal de subscrição.\n\nPor favor contacte o suporte.');
+        console.error('Portal session created but no URL returned:', data);
       }
     } catch (error) {
       console.error('Error opening customer portal:', error);
+      alert('Erro de conexão ao tentar abrir o portal de subscrição.\n\nVerifique sua conexão com a internet e tente novamente.');
     } finally {
       setLoadingPortal(false);
     }

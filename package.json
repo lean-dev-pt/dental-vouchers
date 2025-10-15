@@ -34,7 +34,8 @@
     "react-dom": "^19.0.0",
     "recharts": "^2.15.4",
     "stripe": "^19.1.0",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.3.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

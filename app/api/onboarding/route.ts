@@ -1,5 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
+import { z } from 'zod';
+import { rateLimit, getClientIp } from '@/lib/rate-limiter';
+
+// Zod validation schema for onboarding data
+const OnboardingSchema = z.object({
+  clinicName: z.string()
+    .min(3, 'Clinic name must be at least 3 characters')
+    .max(100, 'Clinic name cannot exceed 100 characters')
+    .trim(),
+  ownerName: z.string()
+    .min(2, 'Owner name must be at least 2 characters')
+    .max(100, 'Owner name cannot exceed 100 characters')
+    .trim()
+    .optional()
+    .nullable(),
+  phone: z.string()
+    .regex(/^[0-9\s\+\-\(\)]+$/, 'Invalid phone number format')
+    .max(20, 'Phone number cannot exceed 20 characters')
+    .trim()
+    .optional()
+    .nullable(),
+  dpaConsent: z.boolean()
+    .refine(val => val === true, {
+      message: 'DPA consent is required'
+    })
+});
 
 // Create admin Supabase client with service role key (bypasses RLS and auth checks)
 const supabaseAdmin = createClient(
@@ -15,35 +42,65 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, email, clinicName, ownerName, dpaConsent } = await req.json();
+    // SECURITY: Get authenticated user from session (cannot be faked by client)
+    const supabase = await createServerClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    // Validate required fields
-    if (!userId || !email) {
+    if (authError || !user) {
       return NextResponse.json(
-        { error: 'User ID and email are required' },
+        { error: 'Unauthorized - Please log in' },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit: 3 onboarding attempts per user per hour (prevents spam/abuse)
+    const userRateLimit = rateLimit(`onboarding-user:${user.id}`, {
+      interval: 60 * 60 * 1000, // 1 hour
+      maxRequests: 3,
+    });
+
+    if (!userRateLimit.success) {
+      return NextResponse.json(
+        { error: 'Demasiadas tentativas. Por favor tente novamente mais tarde.' },
+        { status: 429 }
+      );
+    }
+
+    // Rate limit by IP: 5 attempts per hour
+    const ip = getClientIp(req);
+    const ipRateLimit = rateLimit(`onboarding-ip:${ip}`, {
+      interval: 60 * 60 * 1000, // 1 hour
+      maxRequests: 5,
+    });
+
+    if (!ipRateLimit.success) {
+      return NextResponse.json(
+        { error: 'Demasiadas tentativas deste dispositivo.' },
+        { status: 429 }
+      );
+    }
+
+    // Get request body
+    const body = await req.json();
+
+    // Validate input data with Zod
+    const validationResult = OnboardingSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0];
+      return NextResponse.json(
+        { error: firstError.message },
         { status: 400 }
       );
     }
 
-    if (!clinicName || clinicName.trim() === '') {
-      return NextResponse.json(
-        { error: 'Clinic name is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!dpaConsent) {
-      return NextResponse.json(
-        { error: 'DPA consent is required' },
-        { status: 400 }
-      );
-    }
+    const { clinicName, ownerName, dpaConsent } = validationResult.data;
 
     // Check if user already has a profile/clinic
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
       .select('id, clinic_id')
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .single();
 
     if (existingProfile) {
@@ -75,10 +132,10 @@ export async function POST(req: NextRequest) {
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
-        user_id: userId,
+        user_id: user.id,
         clinic_id: clinic.id,
         role: 'admin', // First user is always admin
-        name: ownerName?.trim() || email?.split('@')[0] || 'Admin',
+        name: ownerName?.trim() || user.email?.split('@')[0] || 'Admin',
       })
       .select()
       .single();

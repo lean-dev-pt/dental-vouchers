@@ -64,29 +64,83 @@ export async function updateSession(request: NextRequest) {
 
     // Allow access to account and support pages without subscription check
     if (!isAccountPage && !isSupportPage) {
-      // Get user's profile to find clinic_id
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("clinic_id")
-        .eq("user_id", user.sub)
-        .single();
+      // Check if we have a cached subscription status
+      const cachedSubStatus = request.cookies.get('sub_status');
+      const cachedClinicId = request.cookies.get('clinic_id');
 
-      if (profile?.clinic_id) {
-        // Check if clinic has active subscription
-        const { data: subscription } = await supabase
-          .from("subscriptions")
-          .select("status")
-          .eq("clinic_id", profile.clinic_id)
-          .eq("status", "active")
-          .maybeSingle();
+      let hasActiveSubscription = false;
+      let clinicId: string | null = null;
 
-        // No active subscription → redirect to account page (subscription tab)
-        if (!subscription) {
-          const url = request.nextUrl.clone();
-          url.pathname = "/dashboard/account";
-          url.search = "?tab=subscricao";
-          return NextResponse.redirect(url);
+      // If cache exists and hasn't expired, use it
+      if (cachedSubStatus && cachedClinicId) {
+        try {
+          const cacheData = JSON.parse(cachedSubStatus.value);
+          const cacheExpiry = cacheData.expires_at;
+
+          if (cacheExpiry && Date.now() < cacheExpiry) {
+            // Cache is still valid
+            hasActiveSubscription = cacheData.active === true;
+            clinicId = cachedClinicId.value;
+          }
+        } catch {
+          // Invalid cache, will refresh below
         }
+      }
+
+      // If no valid cache, query database and cache the result
+      if (clinicId === null) {
+        // Get user's profile to find clinic_id
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("clinic_id")
+          .eq("user_id", user.sub)
+          .single();
+
+        if (profile?.clinic_id) {
+          const profileClinicId = profile.clinic_id; // Extract to guarantee non-null type
+          clinicId = profileClinicId;
+
+          // Check if clinic has active subscription
+          const { data: subscription } = await supabase
+            .from("subscriptions")
+            .select("status")
+            .eq("clinic_id", profileClinicId)
+            .eq("status", "active")
+            .maybeSingle();
+
+          hasActiveSubscription = !!subscription;
+
+          // Cache the result for 10 minutes
+          const cacheExpiry = Date.now() + (10 * 60 * 1000); // 10 minutes
+          const cacheValue = JSON.stringify({
+            active: hasActiveSubscription,
+            expires_at: cacheExpiry
+          });
+
+          supabaseResponse.cookies.set('sub_status', cacheValue, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 10, // 10 minutes
+            path: '/'
+          });
+
+          supabaseResponse.cookies.set('clinic_id', profileClinicId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 10, // 10 minutes
+            path: '/'
+          });
+        }
+      }
+
+      // No active subscription → redirect to account page (subscription tab)
+      if (!hasActiveSubscription) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard/account";
+        url.search = "?tab=subscricao";
+        return NextResponse.redirect(url);
       }
     }
   }
@@ -100,7 +154,6 @@ export async function updateSession(request: NextRequest) {
     "/auth/callback",
     "/auth/check-email",
     "/onboarding",
-    "/testlogin",
   ];
 
   const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname) ||

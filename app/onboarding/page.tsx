@@ -57,8 +57,6 @@ function OnboardingContent() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: user.id,
-            email: user.email,
             clinicName: clinicNameFromMetadata,
             ownerName: user.user_metadata?.ownerName,
             phone: user.user_metadata?.phone,

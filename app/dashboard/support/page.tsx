@@ -368,14 +368,14 @@ export default function SupportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-4 sm:p-8 text-white shadow-xl">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="p-2 sm:p-3 bg-white/20 rounded-xl">
-            <HelpCircle className="h-6 w-6 sm:h-8 sm:w-8" />
+      <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-3 sm:p-8 text-white shadow-xl">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="p-1.5 sm:p-3 bg-white/20 rounded-xl">
+            <HelpCircle className="h-5 w-5 sm:h-8 sm:w-8" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold">Centro de Suporte</h1>
-            <p className="text-pink-100 mt-1 text-sm sm:text-base">Como podemos ajudar?</p>
+            <h1 className="text-xl sm:text-3xl font-extrabold">Centro de Suporte</h1>
+            <p className="text-pink-100 mt-0.5 sm:mt-1 text-xs sm:text-base">Como podemos ajudar?</p>
           </div>
         </div>
       </div>
@@ -404,7 +404,7 @@ export default function SupportPage() {
         {/* Help Center Tab */}
         <TabsContent value="help" className="space-y-6">
           {/* Search and Filter */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 px-1">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -469,40 +469,40 @@ export default function SupportPage() {
               return (
                 <div key={category} id={`category-${category}`} className="scroll-mt-32">
                   {/* Category Header */}
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className={`p-3 bg-gradient-to-r ${config.gradient} rounded-xl`}>
-                      <Icon className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-2 mb-4 sm:gap-3 sm:mb-6">
+                    <div className={`p-2 sm:p-3 bg-gradient-to-r ${config.gradient} rounded-xl`}>
+                      <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                     <div>
-                      <h2 className={`text-2xl font-extrabold bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
+                      <h2 className={`text-xl sm:text-2xl font-extrabold bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
                         {config.label}
                       </h2>
-                      <p className="text-sm text-gray-500">{categoryArticles.length} artigos</p>
+                      <p className="text-xs sm:text-sm text-gray-500">{categoryArticles.length} artigos</p>
                     </div>
                   </div>
 
                   {/* Articles Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                     {categoryArticles.map((article) => (
                       <Card
                         key={article.id}
-                        className="relative p-6 hover:shadow-2xl transition-all duration-300 border-2 border-pink-100 cursor-pointer hover:z-10 hover:-translate-y-1"
+                        className="relative p-4 sm:p-6 hover:shadow-2xl transition-all duration-300 border-2 border-pink-100 cursor-pointer hover:z-10 hover:-translate-y-1"
                         onClick={() => setSelectedArticle(article)}
                       >
-                        <div className="space-y-3">
-                          <div className="space-y-2">
-                            <Badge className={`bg-gradient-to-r ${config.gradient} text-white border-0 w-fit`}>
+                        <div className="space-y-2 sm:space-y-3">
+                          <div className="space-y-1 sm:space-y-2">
+                            <Badge className={`bg-gradient-to-r ${config.gradient} text-white border-0 w-fit text-xs`}>
                               {config.label}
                             </Badge>
-                            <h3 className="font-bold text-lg text-gray-900 leading-tight">{article.title}</h3>
+                            <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-tight">{article.title}</h3>
                           </div>
-                          <p className="text-gray-600 line-clamp-3">{article.content.substring(0, 150)}...</p>
+                          <p className="text-sm sm:text-base text-gray-600 line-clamp-3">{article.content.substring(0, 150)}...</p>
                         </div>
                       </Card>
                     ))}
                   </div>
 
-                  <Separator className="mt-12" />
+                  <Separator className="mt-8 sm:mt-12" />
                 </div>
               );
             })}

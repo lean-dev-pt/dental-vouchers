@@ -305,29 +305,31 @@ function AccountPageContent() {
 
       {/* Tabs Component */}
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-1">
-          <TabsTrigger
-            value="geral"
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all"
-          >
-            <User className="w-4 h-4 mr-2" />
-            Geral
-          </TabsTrigger>
-          <TabsTrigger
-            value="configuracoes"
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all"
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Configurações
-          </TabsTrigger>
-          <TabsTrigger
-            value="subscricao"
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all"
-          >
-            <CreditCard className="w-4 h-4 mr-2" />
-            Subscrição
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex justify-center mb-6">
+          <TabsList className="inline-flex w-auto bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-1">
+            <TabsTrigger
+              value="geral"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all px-4 py-2"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Geral
+            </TabsTrigger>
+            <TabsTrigger
+              value="configuracoes"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all px-4 py-2"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Configurações
+            </TabsTrigger>
+            <TabsTrigger
+              value="subscricao"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all px-4 py-2"
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Subscrição
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Geral Tab */}
         <TabsContent value="geral">

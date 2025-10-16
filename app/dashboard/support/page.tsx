@@ -402,9 +402,9 @@ export default function SupportPage() {
         </div>
 
         {/* Help Center Tab */}
-        <TabsContent value="help" className="space-y-6">
+        <TabsContent value="help" className="space-y-6 px-1">
           {/* Search and Filter */}
-          <div className="flex flex-col sm:flex-row gap-3 px-1">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input

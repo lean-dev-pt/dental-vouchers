@@ -311,22 +311,22 @@ function AccountPageContent() {
               value="geral"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all px-4 py-2"
             >
-              <User className="w-4 h-4 mr-2" />
-              Geral
+              <User className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline data-[state=active]:inline data-[state=active]:ml-2 md:data-[state=active]:ml-0">Geral</span>
             </TabsTrigger>
             <TabsTrigger
               value="configuracoes"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all px-4 py-2"
             >
-              <Settings className="w-4 h-4 mr-2" />
-              Configurações
+              <Settings className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline data-[state=active]:inline data-[state=active]:ml-2 md:data-[state=active]:ml-0">Configurações</span>
             </TabsTrigger>
             <TabsTrigger
               value="subscricao"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-400 data-[state=active]:to-cyan-500 data-[state=active]:text-white rounded-lg font-semibold transition-all px-4 py-2"
             >
-              <CreditCard className="w-4 h-4 mr-2" />
-              Subscrição
+              <CreditCard className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline data-[state=active]:inline data-[state=active]:ml-2 md:data-[state=active]:ml-0">Subscrição</span>
             </TabsTrigger>
           </TabsList>
         </div>

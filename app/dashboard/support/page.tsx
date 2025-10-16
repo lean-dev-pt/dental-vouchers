@@ -368,36 +368,38 @@ export default function SupportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-white/20 rounded-xl">
-            <HelpCircle className="h-8 w-8" />
+      <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-4 sm:p-8 text-white shadow-xl">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="p-2 sm:p-3 bg-white/20 rounded-xl">
+            <HelpCircle className="h-6 w-6 sm:h-8 sm:w-8" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold">Centro de Suporte</h1>
-            <p className="text-pink-100 mt-1">Como podemos ajudar?</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold">Centro de Suporte</h1>
+            <p className="text-pink-100 mt-1 text-sm sm:text-base">Como podemos ajudar?</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="inline-flex h-10 items-center justify-start rounded-xl bg-gradient-to-r from-pink-50 to-rose-50 p-1 text-gray-600 w-auto border border-pink-100">
-          <TabsTrigger
-            value="help"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-md"
-          >
-            <BookOpen className="h-4 w-4 mr-2" />
-            Ajuda
-          </TabsTrigger>
-          <TabsTrigger
-            value="tickets"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-md"
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Os Meus Tickets ({tickets.length})
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex justify-center">
+          <TabsList className="inline-flex h-10 items-center justify-start rounded-xl bg-gradient-to-r from-pink-50 to-rose-50 p-1 text-gray-600 w-auto border border-pink-100">
+            <TabsTrigger
+              value="help"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-md"
+            >
+              <BookOpen className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline data-[state=active]:inline data-[state=active]:ml-2 md:data-[state=active]:ml-0">Ajuda</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="tickets"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-md"
+            >
+              <MessageSquare className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline data-[state=active]:inline data-[state=active]:ml-2 md:data-[state=active]:ml-0">Os Meus Tickets ({tickets.length})</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Help Center Tab */}
         <TabsContent value="help" className="space-y-6">
@@ -426,9 +428,9 @@ export default function SupportPage() {
           </div>
 
           {/* Sticky Category Navigation */}
-          <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-2 border-pink-100 rounded-xl p-4 shadow-lg">
+          <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-2 border-pink-100 rounded-xl p-3 sm:p-4 shadow-lg">
             <ScrollArea className="w-full">
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 {Object.entries(categoryConfig).map(([key, config]) => {
                   const Icon = config.icon;
                   const count = categoryCounts[key] || 0;
@@ -443,16 +445,16 @@ export default function SupportPage() {
                           : "hover:border-pink-300"
                       }`}
                     >
-                      <Icon className="h-4 w-4" />
-                      <span className="font-semibold">{config.label}</span>
-                      <Badge variant="secondary" className="ml-1 bg-white/20 text-current border-0">
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="font-semibold hidden sm:inline">{config.label}</span>
+                      <Badge variant="secondary" className="ml-1 bg-white/20 text-current border-0 text-xs">
                         {count}
                       </Badge>
                     </Button>
                   );
                 })}
               </div>
-              <ScrollBar orientation="horizontal" />
+              <ScrollBar orientation="horizontal" className="h-2" />
             </ScrollArea>
           </div>
 
